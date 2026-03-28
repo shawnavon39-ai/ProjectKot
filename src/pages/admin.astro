@@ -17,15 +17,15 @@
 export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { env } from 'cloudflare:workers';
 import { createClient } from '@supabase/supabase-js';
 import { platformDisplayNames } from '../lib/types';
 import type { Shop } from '../lib/types';
 
-const runtimeEnv = Astro.locals.runtime?.env ?? import.meta.env;
-const ADMIN_PASSWORD = runtimeEnv.ADMIN_PASSWORD;
+const ADMIN_PASSWORD = (env as any).ADMIN_PASSWORD ?? import.meta.env.ADMIN_PASSWORD;
 const supabaseAdmin = createClient(
-  runtimeEnv.PUBLIC_SUPABASE_URL,
-  runtimeEnv.SUPABASE_SERVICE_ROLE_KEY,
+  (env as any).PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL,
+  (env as any).SUPABASE_SERVICE_ROLE_KEY ?? import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
 );
 
 // Check for password in cookie (set after login)

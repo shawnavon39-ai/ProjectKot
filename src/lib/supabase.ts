@@ -1,25 +1,17 @@
 /*
   Supabase client factory.
 
-  On Cloudflare Workers, environment variables aren't available via
-  import.meta.env at runtime — they come through the Worker's env
-  bindings. Astro's Cloudflare adapter exposes them via
-  Astro.locals.runtime.env.
+  On Cloudflare Workers (Astro v6), env vars are accessed via:
+    import { env } from "cloudflare:workers"
+  NOT import.meta.env (which is only available at build time).
 
-  So instead of creating a singleton at module scope (which would crash
-  because the env vars don't exist yet), we export a factory function.
-  Each page calls getSupabase() with the runtime env.
-
-  This is a common pattern in serverless/edge: you can't rely on
-  module-level initialization because the execution context (and its
-  env vars) only exists inside the request handler.
+  We export a factory so each page can pass the env object.
+  The fallback to import.meta.env supports local dev and client-side.
 */
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-type RuntimeEnv = Record<string, string>;
-
-export function getSupabase(runtimeEnv?: RuntimeEnv): SupabaseClient {
-  const url = runtimeEnv?.PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL;
-  const key = runtimeEnv?.PUBLIC_SUPABASE_ANON_KEY ?? import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+export function getSupabase(cfEnv?: Record<string, any>): SupabaseClient {
+  const url = cfEnv?.PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL;
+  const key = cfEnv?.PUBLIC_SUPABASE_ANON_KEY ?? import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
   return createClient(url, key);
 }

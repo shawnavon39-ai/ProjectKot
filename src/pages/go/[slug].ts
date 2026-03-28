@@ -15,15 +15,15 @@
   Most affiliate sites (Wirecutter, etc.) use exactly this approach.
 */
 import type { APIRoute } from 'astro';
+import { env } from 'cloudflare:workers';
 import { getSupabase } from '../../lib/supabase';
 import { getAffiliateUrl } from '../../lib/affiliate';
 import type { Shop } from '../../lib/types';
 
 export const prerender = false;
 
-export const GET: APIRoute = async ({ params, redirect, locals }) => {
-  const runtimeEnv = (locals as any).runtime?.env;
-  const supabase = getSupabase(runtimeEnv);
+export const GET: APIRoute = async ({ params, redirect }) => {
+  const supabase = getSupabase(env as any);
   const { slug } = params;
 
   const { data } = await supabase
