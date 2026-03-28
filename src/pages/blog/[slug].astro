@@ -1,0 +1,99 @@
+---
+/*
+  blog/[...slug].astro — renders an individual blog post.
+
+  Uses Astro's Content Collections:
+    getCollection('blog')  → all posts (for getStaticPaths)
+    post.render()          → converts Markdown to HTML
+
+  The [...slug] catch-all syntax handles nested paths if needed,
+  but for flat blog posts it works the same as [slug].
+
+  Prerendered at build time — each post becomes a static HTML page.
+  This is ideal for SEO: fast, cacheable, fully indexable.
+*/
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map(post => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const categoryColours: Record<string, string> = {
+  fashion: 'bg-pink-100 text-pink-800',
+  beauty: 'bg-purple-100 text-purple-800',
+  home: 'bg-amber-100 text-amber-800',
+  tech: 'bg-blue-100 text-blue-800',
+  lifestyle: 'bg-green-100 text-green-800',
+  guides: 'bg-gray-100 text-gray-800',
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": post.data.title,
+  "description": post.data.description,
+  "datePublished": post.data.pubDate.toISOString(),
+  ...(post.data.updatedDate && { "dateModified": post.data.updatedDate.toISOString() }),
+};
+---
+
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  ogType="article"
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+  <article class="max-w-3xl mx-auto px-4 py-12">
+    <!-- Breadcrumb -->
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="/" class="hover:text-gray-900">Home</a>
+      <span class="mx-2">›</span>
+      <a href="/blog" class="hover:text-gray-900">Blog</a>
+      <span class="mx-2">›</span>
+      <span class="text-gray-900">{post.data.title}</span>
+    </nav>
+
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold mb-3">{post.data.title}</h1>
+      <div class="flex items-center gap-3 text-sm text-gray-500">
+        <time datetime={post.data.pubDate.toISOString()}>
+          {post.data.pubDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+        </time>
+        <span class={`px-2 py-0.5 rounded-full text-xs font-medium ${categoryColours[post.data.category] ?? 'bg-gray-100 text-gray-800'}`}>
+          {post.data.category}
+        </span>
+      </div>
+      {post.data.tags.length > 0 && (
+        <div class="flex flex-wrap gap-2 mt-3">
+          {post.data.tags.map(tag => (
+            <span class="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">{tag}</span>
+          ))}
+        </div>
+      )}
+    </header>
+
+    <div class="prose prose-gray max-w-none">
+      <Content />
+    </div>
+
+    <!-- CTA -->
+    <div class="mt-12 bg-blue-50 rounded-xl p-6 text-center">
+      <h2 class="text-lg font-bold mb-1">Discover more creator shops</h2>
+      <p class="text-gray-600 text-sm mb-4">Browse our full directory of shops across every platform.</p>
+      <a href="/shops" class="inline-block px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">
+        Browse Shops
+      </a>
+    </div>
+  </article>
+</BaseLayout>

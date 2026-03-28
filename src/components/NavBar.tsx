@@ -60,6 +60,7 @@ export default function NavBar() {
 
       <div className="flex items-center gap-4">
         <a href="/shops" className="text-sm text-gray-600 hover:text-gray-900">Browse Shops</a>
+        <a href="/blog" className="text-sm text-gray-600 hover:text-gray-900">Blog</a>
         <a href="/submit" className="text-sm text-gray-600 hover:text-gray-900">Submit a Shop</a>
 
         {!loading && (
