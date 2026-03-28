@@ -17,6 +17,9 @@ export interface Shop {
   followers: string | null;
   status: 'pending' | 'approved' | 'rejected';
   submitted_by: string | null;
+  clicks: number;
+  avg_rating: number;
+  review_count: number;
 }
 
 export const platformDisplayNames: Record<Shop['platform'], string> = {

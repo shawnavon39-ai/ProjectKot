@@ -16,6 +16,7 @@
 export const prerender = false;
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ReviewForm from '../../components/ReviewForm';
 import { env } from 'cloudflare:workers';
 import { getSupabase } from '../../lib/supabase';
 import { platformDisplayNames, platformColours } from '../../lib/types';
@@ -38,6 +39,19 @@ if (!data) {
 const shop = data as Shop;
 const displayName = platformDisplayNames[shop.platform];
 const colour = platformColours[shop.platform];
+
+// Fetch approved reviews for this shop
+const { data: reviewData } = await supabase
+  .from('reviews')
+  .select('*')
+  .eq('shop_id', shop.id)
+  .eq('status', 'approved')
+  .order('created_at', { ascending: false });
+
+const reviews = reviewData ?? [];
+const avgRating = reviews.length > 0
+  ? (reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length)
+  : 0;
 
 /*
   JSON-LD structured data — tells Google "this page is about a specific store."
@@ -106,6 +120,46 @@ const jsonLd = {
       >
         Visit Shop on {displayName} ↗
       </a>
+
+      {avgRating > 0 && (
+        <div class="mt-6 pt-6 border-t border-gray-100 flex items-center gap-2 text-sm text-gray-600">
+          <span class="text-amber-500 text-lg">{'★'.repeat(Math.round(avgRating))}{'☆'.repeat(5 - Math.round(avgRating))}</span>
+          <span>{avgRating.toFixed(1)} out of 5</span>
+          <span class="text-gray-400">·</span>
+          <span>{reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}</span>
+        </div>
+      )}
+    </div>
+
+    <!-- Reviews section -->
+    <div class="mt-8">
+      <h2 class="text-xl font-bold mb-4">Reviews</h2>
+
+      {reviews.length > 0 ? (
+        <div class="space-y-4 mb-8">
+          {reviews.map((review: any) => (
+            <div class="bg-white rounded-xl border border-gray-200 p-5">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="font-medium text-sm">{review.display_name}</span>
+                  <span class="text-amber-500 text-sm">{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span>
+                </div>
+                <time class="text-xs text-gray-400" datetime={review.created_at}>
+                  {new Date(review.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </time>
+              </div>
+              <p class="text-sm text-gray-700">{review.body}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p class="text-sm text-gray-500 mb-8">No reviews yet — be the first!</p>
+      )}
+
+      <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold mb-4">Leave a Review</h3>
+        <ReviewForm shopId={shop.id} client:only="react" />
+      </div>
     </div>
   </section>
 </BaseLayout>
