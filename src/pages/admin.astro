@@ -77,10 +77,31 @@ if (Astro.request.method === 'POST') {
     message = error ? `Error: ${error.message}` : 'Shop rejected.';
     messageType = error ? 'error' : 'success';
   }
+
+  if (action === 'approve_review' && isAuthenticated) {
+    const reviewId = formData.get('review_id') as string;
+    const { error } = await supabaseAdmin
+      .from('reviews')
+      .update({ status: 'approved' })
+      .eq('id', reviewId);
+    message = error ? `Error: ${error.message}` : 'Review approved!';
+    messageType = error ? 'error' : 'success';
+  }
+
+  if (action === 'reject_review' && isAuthenticated) {
+    const reviewId = formData.get('review_id') as string;
+    const { error } = await supabaseAdmin
+      .from('reviews')
+      .update({ status: 'rejected' })
+      .eq('id', reviewId);
+    message = error ? `Error: ${error.message}` : 'Review rejected.';
+    messageType = error ? 'error' : 'success';
+  }
 }
 
 // Fetch pending shops (only if authenticated)
 let pendingShops: Shop[] = [];
+let pendingReviews: any[] = [];
 let approvedCount = 0;
 let pendingCount = 0;
 
@@ -105,6 +126,15 @@ if (isAuthenticated) {
 
   approvedCount = approved ?? 0;
   pendingCount = pendingTotal ?? 0;
+
+  // Fetch pending reviews with shop name
+  const { data: pendingReviewData } = await supabaseAdmin
+    .from('reviews')
+    .select('*, shops(name)')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: true });
+
+  pendingReviews = (pendingReviewData ?? []) as any[];
 }
 ---
 
@@ -225,6 +255,49 @@ if (isAuthenticated) {
             ))}
           </div>
         )}
+
+        <!-- Review moderation -->
+        <div class="mt-12">
+          <h2 class="text-xl font-bold mb-4">Pending Reviews ({pendingReviews.length})</h2>
+
+          {pendingReviews.length === 0 ? (
+            <p class="text-gray-500 text-sm">No reviews waiting for moderation.</p>
+          ) : (
+            <div class="space-y-4">
+              {pendingReviews.map((review: any) => (
+                <div class="bg-white border border-gray-200 rounded-xl p-5">
+                  <div class="flex items-start justify-between mb-2">
+                    <div>
+                      <span class="font-medium text-sm">{review.display_name}</span>
+                      <span class="text-amber-500 text-sm ml-2">{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span>
+                      <span class="text-xs text-gray-400 ml-2">on {review.shops?.name ?? 'Unknown shop'}</span>
+                    </div>
+                    <time class="text-xs text-gray-400">
+                      {new Date(review.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                    </time>
+                  </div>
+                  <p class="text-sm text-gray-700 mb-4">{review.body}</p>
+                  <div class="flex gap-3">
+                    <form method="POST" class="inline">
+                      <input type="hidden" name="action" value="approve_review" />
+                      <input type="hidden" name="review_id" value={review.id} />
+                      <button type="submit" class="px-4 py-2 bg-green-600 text-white text-sm rounded-lg font-medium hover:bg-green-700 transition">
+                        Approve
+                      </button>
+                    </form>
+                    <form method="POST" class="inline">
+                      <input type="hidden" name="action" value="reject_review" />
+                      <input type="hidden" name="review_id" value={review.id} />
+                      <button type="submit" class="px-4 py-2 bg-red-600 text-white text-sm rounded-lg font-medium hover:bg-red-700 transition">
+                        Reject
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     )}
   </section>

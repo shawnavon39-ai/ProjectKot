@@ -76,6 +76,19 @@ const platforms = Object.entries(platformDisplayNames).map(([key, name]) => ({
 ---
 
 <BaseLayout title="Discover Creator Shops">
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Pick Your Shop",
+    "url": "https://pickyour.shop",
+    "description": "Discover creator shops across TikTok, Instagram, YouTube, Pinterest, and Amazon — all in one directory.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://pickyour.shop/shops?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  })} />
+
   <section class="max-w-7xl mx-auto px-4 py-16 text-center">
     <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">
       Every creator shop.<br />
