@@ -8,17 +8,23 @@
 
   This is similar to how Firebase Auth works if you've seen that before.
 */
-import { useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { useState, useRef } from 'react';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
-);
+function getSupabase() {
+  return createClient(
+    import.meta.env.PUBLIC_SUPABASE_URL,
+    import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+  );
+}
 
 type Mode = 'signin' | 'signup';
 
 export default function AuthForm() {
+  const supabaseRef = useRef<SupabaseClient | null>(null);
+  if (!supabaseRef.current) supabaseRef.current = getSupabase();
+  const supabase = supabaseRef.current;
+
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

@@ -5,15 +5,17 @@
   to the submission (submitted_by). If not, it submits anonymously.
   Either way, the shop goes into 'pending' status for admin review.
 */
-import { useState, useReducer, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { useState, useReducer, useEffect, useRef } from 'react';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { User } from '@supabase/supabase-js';
 import type { Shop } from '../lib/types';
 
-const supabase = createClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
-);
+function getSupabase() {
+  return createClient(
+    import.meta.env.PUBLIC_SUPABASE_URL,
+    import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+  );
+}
 
 type FormState = {
   name: string;
@@ -49,6 +51,10 @@ function formReducer(state: FormState, action: FormAction): FormState {
 type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
 
 export default function SubmitForm() {
+  const supabaseRef = useRef<SupabaseClient | null>(null);
+  if (!supabaseRef.current) supabaseRef.current = getSupabase();
+  const supabase = supabaseRef.current;
+
   const [state, dispatch] = useReducer(formReducer, initialState);
   const [status, setStatus] = useState<SubmitStatus>('idle');
   const [errorMessage, setErrorMessage] = useState('');
