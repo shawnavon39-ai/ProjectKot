@@ -1,22 +1,25 @@
 /*
-  Supabase client — single instance shared across the app.
+  Supabase client factory.
 
-  In React you'd usually set this up in a context provider.
-  In Astro, since .astro files run at build/server time, you just
-  import this directly — no provider wrapper needed.
+  On Cloudflare Workers, environment variables aren't available via
+  import.meta.env at runtime — they come through the Worker's env
+  bindings. Astro's Cloudflare adapter exposes them via
+  Astro.locals.runtime.env.
 
-  For client-side React islands (client:load components), you'd
-  import this same client. Supabase JS works in both environments.
+  So instead of creating a singleton at module scope (which would crash
+  because the env vars don't exist yet), we export a factory function.
+  Each page calls getSupabase() with the runtime env.
+
+  This is a common pattern in serverless/edge: you can't rely on
+  module-level initialization because the execution context (and its
+  env vars) only exists inside the request handler.
 */
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+type RuntimeEnv = Record<string, string>;
 
-/*
-  PUBLIC_ prefix is Astro's equivalent of NEXT_PUBLIC_ in Next.js
-  or VITE_ in Vite. It means "safe to expose to the browser".
-  The anon key is designed to be public — Row Level Security (RLS)
-  in Supabase handles the actual access control.
-*/
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export function getSupabase(runtimeEnv?: RuntimeEnv): SupabaseClient {
+  const url = runtimeEnv?.PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL;
+  const key = runtimeEnv?.PUBLIC_SUPABASE_ANON_KEY ?? import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+  return createClient(url, key);
+}

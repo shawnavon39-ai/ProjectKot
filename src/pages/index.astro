@@ -16,9 +16,12 @@ export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ShopCard from '../components/ShopCard.astro';
-import { supabase } from '../lib/supabase';
+import { getSupabase } from '../lib/supabase';
 import { platformDisplayNames, platformColours } from '../lib/types';
 import type { Shop } from '../lib/types';
+
+const runtimeEnv = Astro.locals.runtime?.env;
+const supabase = getSupabase(runtimeEnv);
 
 const { data: featuredShops } = await supabase
   .from('shops')

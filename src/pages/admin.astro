@@ -21,10 +21,11 @@ import { createClient } from '@supabase/supabase-js';
 import { platformDisplayNames } from '../lib/types';
 import type { Shop } from '../lib/types';
 
-const ADMIN_PASSWORD = import.meta.env.ADMIN_PASSWORD;
+const runtimeEnv = Astro.locals.runtime?.env ?? import.meta.env;
+const ADMIN_PASSWORD = runtimeEnv.ADMIN_PASSWORD;
 const supabaseAdmin = createClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
+  runtimeEnv.PUBLIC_SUPABASE_URL,
+  runtimeEnv.SUPABASE_SERVICE_ROLE_KEY,
 );
 
 // Check for password in cookie (set after login)
