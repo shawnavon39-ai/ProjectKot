@@ -2,9 +2,11 @@
 /*
   shops.astro — the /shops browse page.
 
-  Fetches ALL approved shops from Supabase. The filter buttons are static
-  for now — they'll become a React island later when we add client-side filtering.
+  Server-rendered so newly approved shops appear immediately.
+  Filter buttons are static for now — they'll become a React island later.
 */
+export const prerender = false;
+
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ShopCard from '../components/ShopCard.astro';
 import { supabase } from '../lib/supabase';

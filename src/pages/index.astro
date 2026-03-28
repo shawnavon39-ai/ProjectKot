@@ -2,13 +2,18 @@
 /*
   index.astro — the homepage.
 
-  The Supabase query below runs at BUILD TIME (or server-side in SSR mode).
-  This is the equivalent of getServerSideProps in Next.js — the browser
-  never sees the query, only the rendered HTML result.
+  prerender = false means this page runs on the server per request
+  (as a Cloudflare Worker at the edge). This is equivalent to
+  getServerSideProps in Next.js. The browser never sees the query,
+  only the rendered HTML result.
 
-  RLS handles security: this query only returns shops where status = 'approved'
-  because that's what the policy allows for the anon key.
+  Server-rendering is the right choice here because:
+    1. New shops appear immediately after admin approval (no rebuild needed)
+    2. Cloudflare Workers are fast (~50ms at the edge)
+    3. The env vars are available at runtime (not just build time)
 */
+export const prerender = false;
+
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ShopCard from '../components/ShopCard.astro';
 import { supabase } from '../lib/supabase';

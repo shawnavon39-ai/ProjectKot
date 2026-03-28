@@ -5,33 +5,35 @@
   File-based dynamic routing in Astro works like Next.js:
     src/pages/shops/[slug].astro  →  /shops/stylebymia, /shops/techfinds-uk, etc.
 
-  getStaticPaths() tells Astro at build time: "here are ALL the slugs
-  you need to generate pages for." It fetches every approved shop from
-  Supabase and creates a static HTML page for each one.
+  Server-rendered (prerender = false) so:
+    1. New shops appear instantly after approval — no rebuild needed
+    2. Env vars are available at runtime (Cloudflare Workers)
+    3. Each request takes ~50ms at the edge — still very fast
 
-  This is the equivalent of getStaticPaths + getStaticProps in Next.js.
+  This is the equivalent of getServerSideProps in Next.js.
   Each shop gets its own indexable URL — this is what ranks in Google.
 */
+export const prerender = false;
+
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { supabase } from '../../lib/supabase';
 import { platformDisplayNames, platformColours } from '../../lib/types';
 import type { Shop } from '../../lib/types';
 
-export async function getStaticPaths() {
-  const { data } = await supabase
-    .from('shops')
-    .select('*')
-    .eq('status', 'approved');
+const { slug } = Astro.params;
 
-  const shops = (data ?? []) as Shop[];
+const { data } = await supabase
+  .from('shops')
+  .select('*')
+  .eq('slug', slug)
+  .eq('status', 'approved')
+  .single();
 
-  return shops.map(shop => ({
-    params: { slug: shop.slug },
-    props: { shop },
-  }));
+if (!data) {
+  return Astro.redirect('/shops', 307);
 }
 
-const { shop } = Astro.props as { shop: Shop };
+const shop = data as Shop;
 const displayName = platformDisplayNames[shop.platform];
 const colour = platformColours[shop.platform];
 
