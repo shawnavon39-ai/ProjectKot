@@ -1,18 +1,3 @@
-/*
-  NavBar.tsx — React island for the navigation bar.
-
-  This REPLACES the static <nav> in BaseLayout.astro.
-  It needs to be a React component because:
-    1. It checks auth state (async, runs in browser)
-    2. It re-renders when auth state changes (sign in/out)
-
-  Supabase's onAuthStateChange listener fires whenever the user
-  signs in, signs out, or their token refreshes. We use it to
-  keep the nav in sync without page reloads.
-
-  This is similar to how you'd use onAuthStateChanged in Firebase,
-  or a useContext provider for auth in a React SPA.
-*/
 import { useState, useEffect, useRef } from 'react';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { User } from '@supabase/supabase-js';
@@ -31,15 +16,14 @@ export default function NavBar() {
 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    // Check current session on mount
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
       setLoading(false);
     });
 
-    // Listen for auth changes (sign in, sign out, token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
@@ -55,23 +39,46 @@ export default function NavBar() {
   const displayName = user?.user_metadata?.display_name;
 
   return (
-    <nav className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-      <a href="/" className="text-xl font-bold tracking-tight">Pick Your Shop</a>
+    <nav className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight text-slate-900">
+        <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-violet-600 text-white text-sm font-bold">P</span>
+        <span>Pick Your Shop</span>
+      </a>
 
-      <div className="flex items-center gap-4">
-        <a href="/shops" className="text-sm text-gray-600 hover:text-gray-900">Browse Shops</a>
-        <a href="/blog" className="text-sm text-gray-600 hover:text-gray-900">Blog</a>
-        <a href="/submit" className="text-sm text-gray-600 hover:text-gray-900">Submit a Shop</a>
+      {/* Mobile menu button */}
+      <button
+        onClick={() => setMenuOpen(!menuOpen)}
+        className="sm:hidden p-2 text-slate-600 hover:text-slate-900"
+        aria-label="Toggle menu"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {menuOpen
+            ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          }
+        </svg>
+      </button>
+
+      {/* Desktop nav */}
+      <div className="hidden sm:flex items-center gap-6">
+        <a href="/shops" className="text-sm text-slate-600 hover:text-slate-900 transition font-medium">Browse</a>
+        <a href="/blog" className="text-sm text-slate-600 hover:text-slate-900 transition font-medium">Blog</a>
+        <a
+          href="/submit"
+          className="text-sm px-4 py-2 bg-violet-600 text-white rounded-lg font-medium hover:bg-violet-700 transition"
+        >
+          List Your Shop
+        </a>
 
         {!loading && (
           user ? (
             <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-700 font-medium">
+              <span className="text-sm text-slate-700 font-medium">
                 {displayName || user.email}
               </span>
               <button
                 onClick={handleSignOut}
-                className="text-sm text-gray-500 hover:text-gray-900"
+                className="text-sm text-slate-500 hover:text-slate-900 transition"
               >
                 Sign out
               </button>
@@ -79,13 +86,41 @@ export default function NavBar() {
           ) : (
             <a
               href="/login"
-              className="text-sm px-3 py-1.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition"
+              className="text-sm text-slate-600 hover:text-slate-900 transition font-medium"
             >
               Sign in
             </a>
           )
         )}
       </div>
+
+      {/* Mobile nav */}
+      {menuOpen && (
+        <div className="absolute top-full left-0 right-0 bg-white border-b border-slate-200 shadow-lg sm:hidden z-50">
+          <div className="flex flex-col px-4 py-3 gap-3">
+            <a href="/shops" className="text-sm text-slate-700 font-medium py-1">Browse</a>
+            <a href="/blog" className="text-sm text-slate-700 font-medium py-1">Blog</a>
+            <a
+              href="/submit"
+              className="text-sm px-4 py-2 bg-violet-600 text-white rounded-lg font-medium text-center"
+            >
+              List Your Shop
+            </a>
+            {!loading && (
+              user ? (
+                <button
+                  onClick={handleSignOut}
+                  className="text-sm text-slate-500 hover:text-slate-900 text-left py-1"
+                >
+                  Sign out ({displayName || user.email})
+                </button>
+              ) : (
+                <a href="/login" className="text-sm text-slate-700 font-medium py-1">Sign in</a>
+              )
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

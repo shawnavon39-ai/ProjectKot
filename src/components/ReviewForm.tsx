@@ -39,7 +39,7 @@ export default function ReviewForm({ shopId }: Props) {
   if (!user) {
     return (
       <div className="text-center py-6 text-sm text-gray-500">
-        <a href="/login" className="text-blue-600 hover:underline font-medium">Sign in</a> to leave a review.
+        <a href="/login" className="text-violet-600 hover:underline font-medium">Sign in</a> to leave a review.
       </div>
     );
   }
@@ -115,7 +115,7 @@ export default function ReviewForm({ shopId }: Props) {
           onChange={e => setBody(e.target.value)}
           rows={3}
           placeholder="What did you like about this shop?"
-          className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
         />
       </div>
 
@@ -124,7 +124,7 @@ export default function ReviewForm({ shopId }: Props) {
       <button
         type="submit"
         disabled={submitting}
-        className="px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50"
+        className="px-5 py-2 bg-violet-600 text-white rounded-lg text-sm font-medium hover:bg-violet-700 transition disabled:opacity-50 shadow-sm"
       >
         {submitting ? 'Submitting...' : 'Submit Review'}
       </button>

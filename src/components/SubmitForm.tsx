@@ -164,7 +164,7 @@ export default function SubmitForm() {
           value={state.name}
           onChange={e => dispatch({ type: 'setField', field: 'name', value: e.target.value })}
           placeholder="e.g. StyleByMia"
-          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500"
           required
         />
       </div>
@@ -177,7 +177,7 @@ export default function SubmitForm() {
           id="platform"
           value={state.platform}
           onChange={e => dispatch({ type: 'setField', field: 'platform', value: e.target.value })}
-          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500"
           required
         >
           <option value="">Select a platform</option>
@@ -199,7 +199,7 @@ export default function SubmitForm() {
           value={state.shop_url}
           onChange={e => dispatch({ type: 'setField', field: 'shop_url', value: e.target.value })}
           placeholder="https://..."
-          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500"
           required
         />
       </div>
@@ -212,7 +212,7 @@ export default function SubmitForm() {
           id="category"
           value={state.category}
           onChange={e => dispatch({ type: 'setField', field: 'category', value: e.target.value })}
-          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500"
           required
         >
           <option value="">Select a category</option>
@@ -236,7 +236,7 @@ export default function SubmitForm() {
           value={state.followers}
           onChange={e => dispatch({ type: 'setField', field: 'followers', value: e.target.value })}
           placeholder="e.g. 50K"
-          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500"
         />
       </div>
 
@@ -250,7 +250,7 @@ export default function SubmitForm() {
           value={state.description}
           onChange={e => dispatch({ type: 'setField', field: 'description', value: e.target.value })}
           placeholder="What does your shop sell?"
-          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500"
         />
       </div>
 
@@ -263,7 +263,7 @@ export default function SubmitForm() {
       <button
         type="submit"
         disabled={!isValid || status === 'submitting'}
-        className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full py-3 bg-violet-600 text-white rounded-lg font-semibold hover:bg-violet-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
       >
         {status === 'submitting' ? 'Submitting...' : 'Submit for Review'}
       </button>

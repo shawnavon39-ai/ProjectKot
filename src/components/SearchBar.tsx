@@ -91,28 +91,28 @@ export default function SearchBar() {
         onChange={e => handleChange(e.target.value)}
         onFocus={() => { if (results.length > 0) setOpen(true); }}
         placeholder="Search shops, creators, or categories..."
-        className="w-full px-4 py-3 rounded-lg border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        className="w-full px-5 py-3.5 rounded-xl border border-slate-200 text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-white"
       />
 
       {loading && (
-        <div className="absolute right-3 top-3.5 text-gray-400 text-sm">
+        <div className="absolute right-4 top-4 text-slate-400 text-sm">
           Searching...
         </div>
       )}
 
       {open && results.length > 0 && (
-        <div className="absolute z-50 top-full mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-96 overflow-y-auto">
+        <div className="absolute z-50 top-full mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-lg max-h-96 overflow-y-auto">
           {results.map(shop => (
             <a
               key={shop.slug}
               href={`/shops/${shop.slug}`}
-              className="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0"
+              className="block px-4 py-3 hover:bg-violet-50 border-b border-slate-100 last:border-0 transition"
             >
               <div className="flex items-center justify-between">
-                <span className="font-medium text-gray-900">{shop.name}</span>
-                <span className="text-xs text-gray-500">{platformNames[shop.platform] ?? shop.platform}</span>
+                <span className="font-medium text-slate-900">{shop.name}</span>
+                <span className="text-xs text-slate-500">{platformNames[shop.platform] ?? shop.platform}</span>
               </div>
-              <div className="text-xs text-gray-500 mt-0.5">
+              <div className="text-xs text-slate-500 mt-0.5">
                 {shop.category}
                 {shop.description && ` · ${shop.description.slice(0, 60)}${shop.description.length > 60 ? '...' : ''}`}
               </div>
@@ -122,9 +122,9 @@ export default function SearchBar() {
       )}
 
       {open && query.trim().length >= 2 && results.length === 0 && !loading && (
-        <div className="absolute z-50 top-full mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg p-4 text-center text-sm text-gray-500">
+        <div className="absolute z-50 top-full mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-lg p-4 text-center text-sm text-slate-500">
           No shops found for "{query}".
-          <a href="/submit" className="block mt-1 text-blue-600 hover:underline">Submit a shop →</a>
+          <a href="/submit" className="block mt-1 text-violet-600 hover:underline font-medium">Submit a shop →</a>
         </div>
       )}
     </div>

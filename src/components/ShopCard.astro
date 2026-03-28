@@ -1,11 +1,4 @@
 ---
-/*
-  ShopCard.astro — static component, renders to HTML at build time.
-
-  Now uses the shared Shop type from lib/types.ts instead of an inline interface.
-  The platform slug (e.g. 'tiktok') is mapped to a display name ('TikTok Shop')
-  and colour via the shared lookup maps.
-*/
 import type { Shop } from '../lib/types';
 import { platformDisplayNames, platformColours } from '../lib/types';
 
@@ -18,28 +11,34 @@ const displayName = platformDisplayNames[shop.platform];
 const colour = platformColours[shop.platform];
 ---
 
-<a href={`/shops/${shop.slug}`} class="block bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition group">
+<a
+  href={`/shops/${shop.slug}`}
+  class="block bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 p-5 group border-l-4 border-l-violet-500"
+>
   <div class="flex items-start justify-between mb-3">
-    <h3 class="font-semibold text-lg group-hover:text-blue-600 transition">{shop.name}</h3>
+    <h3 class="font-semibold text-lg text-slate-900 group-hover:text-violet-600 transition">{shop.name}</h3>
     <span class={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${colour}`}>
       {displayName}
     </span>
   </div>
-  <p class="text-sm text-gray-600 mb-3">{shop.description}</p>
-  <div class="flex items-center gap-3 text-xs text-gray-500">
-    <span>{shop.category}</span>
-    {shop.followers && (
-      <>
-        <span>·</span>
-        <span>{shop.followers} followers</span>
-      </>
-    )}
-    {shop.review_count > 0 && (
-      <>
-        <span>·</span>
-        <span class="text-amber-500">★ {shop.avg_rating}</span>
-        <span>({shop.review_count})</span>
-      </>
-    )}
+  <p class="text-sm text-slate-600 mb-3 line-clamp-2">{shop.description}</p>
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-3 text-xs text-slate-500">
+      <span>{shop.category}</span>
+      {shop.followers && (
+        <>
+          <span>·</span>
+          <span>{shop.followers} followers</span>
+        </>
+      )}
+      {shop.review_count > 0 && (
+        <>
+          <span>·</span>
+          <span class="text-amber-500 font-medium">★ {shop.avg_rating}</span>
+          <span>({shop.review_count})</span>
+        </>
+      )}
+    </div>
+    <span class="text-xs text-violet-600 opacity-0 group-hover:opacity-100 transition font-medium">View →</span>
   </div>
 </a>
