@@ -1,0 +1,55 @@
+---
+/*
+  BaseLayout.astro — the shared HTML shell for every page.
+
+  Astro equivalent of React's App.tsx wrapper or Next.js _app.tsx.
+  Unlike React, this runs ONLY at build time — zero JS shipped.
+
+  Props are typed with Astro.props (like React component props):
+*/
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Discover creator shops across TikTok, Instagram, YouTube, Pinterest and Amazon in one place." } = Astro.props;
+
+import '../styles/global.css';
+import NavBar from '../components/NavBar';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title} | KOT</title>
+  </head>
+  <body class="bg-gray-50 text-gray-900 min-h-screen">
+    <!--
+      <slot /> is Astro's version of React's {children}.
+      Whatever you put between <BaseLayout> tags on a page lands here.
+    -->
+    <!--
+      NavBar is now a React island — it checks Supabase auth state
+      and shows Sign In / user name + Sign Out accordingly.
+      client:load means it hydrates immediately (nav is above the fold).
+    -->
+    <header class="bg-white border-b border-gray-200">
+      <NavBar client:load />
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="border-t border-gray-200 mt-16">
+      <div class="max-w-7xl mx-auto px-4 py-8 text-sm text-gray-500">
+        &copy; {new Date().getFullYear()} KOT — Social Commerce Aggregator
+      </div>
+    </footer>
+  </body>
+</html>

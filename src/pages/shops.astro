@@ -1,0 +1,45 @@
+---
+/*
+  shops.astro — the /shops browse page.
+
+  Fetches ALL approved shops from Supabase. The filter buttons are static
+  for now — they'll become a React island later when we add client-side filtering.
+*/
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ShopCard from '../components/ShopCard.astro';
+import { supabase } from '../lib/supabase';
+import { platformDisplayNames } from '../lib/types';
+import type { Shop } from '../lib/types';
+
+const { data } = await supabase
+  .from('shops')
+  .select('*')
+  .order('created_at', { ascending: false });
+
+const shops = (data ?? []) as Shop[];
+---
+
+<BaseLayout title="Browse Shops">
+  <section class="max-w-7xl mx-auto px-4 py-12">
+    <h1 class="text-3xl font-bold mb-8">Browse Shops</h1>
+
+    <div class="flex flex-wrap gap-2 mb-8">
+      <a href="/shops" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-600 text-white">All</a>
+      {Object.entries(platformDisplayNames).map(([key, name]) => (
+        <a href={`/shops?platform=${key}`} class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">
+          {name}
+        </a>
+      ))}
+    </div>
+
+    {shops.length > 0 ? (
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {shops.map(shop => (
+          <ShopCard shop={shop} />
+        ))}
+      </div>
+    ) : (
+      <p class="text-gray-500">No shops found.</p>
+    )}
+  </section>
+</BaseLayout>
