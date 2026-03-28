@@ -1,0 +1,14 @@
+# Cloudflare Workers / Pages config.
+#
+# The [vars] section makes environment variables available to miniflare
+# during the Astro prerender step (build-time static page generation).
+# Without this, getStaticPaths() can't reach Supabase during the build.
+#
+# PUBLIC_ vars are safe to commit — the anon key is designed to be public
+# (Row Level Security in Supabase handles actual access control).
+# Secrets (service role key, admin password) stay in the Cloudflare
+# dashboard and are only available at runtime, not build time.
+
+[vars]
+PUBLIC_SUPABASE_URL = "https://sbfxxxuvefjphijflxax.supabase.co"
+PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNiZnh4eHV2ZWZqcGhpamZseGF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDY4NzAsImV4cCI6MjA5MDI4Mjg3MH0.dBh7SiGM3Yc0RjHmPhE5kABCPAjbrFy_qd9eEKPNLzU"
