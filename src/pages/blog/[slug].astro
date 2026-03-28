@@ -44,6 +44,22 @@ const jsonLd = {
   "description": post.data.description,
   "datePublished": post.data.pubDate.toISOString(),
   ...(post.data.updatedDate && { "dateModified": post.data.updatedDate.toISOString() }),
+  "author": { "@type": "Organization", "name": "Pick Your Shop" },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Pick Your Shop",
+    "url": "https://pickyour.shop",
+  },
+};
+
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://pickyour.shop" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://pickyour.shop/blog" },
+    { "@type": "ListItem", "position": 3, "name": post.data.title },
+  ],
 };
 ---
 
@@ -53,6 +69,7 @@ const jsonLd = {
   ogType="article"
 >
   <script slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
 
   <article class="max-w-3xl mx-auto px-4 py-12">
     <!-- Breadcrumb -->
