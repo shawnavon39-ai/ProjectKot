@@ -19,8 +19,7 @@ export default defineConfig({
   */
   adapter: cloudflare(),
 
-  // Update this to your actual domain once it's live
-  site: 'https://kot.example.com',
+  site: 'https://pickyour.shop',
 
   integrations: [react(), sitemap()],
 

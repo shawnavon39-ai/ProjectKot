@@ -28,7 +28,7 @@ export const GET: APIRoute = async ({ params, redirect }) => {
 
   const { data } = await supabase
     .from('shops')
-    .select('shop_url, platform')
+    .select('id, shop_url, platform')
     .eq('slug', slug)
     .eq('status', 'approved')
     .single();
@@ -37,7 +37,11 @@ export const GET: APIRoute = async ({ params, redirect }) => {
     return redirect('/shops', 307);
   }
 
-  const shop = data as Pick<Shop, 'shop_url' | 'platform'>;
+  const shop = data as Pick<Shop, 'id' | 'shop_url' | 'platform'>;
+
+  // Fire-and-forget: increment clicks without blocking the redirect
+  supabase.rpc('increment_clicks', { shop_id: shop.id });
+
   const affiliateUrl = getAffiliateUrl(shop.platform, shop.shop_url);
 
   /*

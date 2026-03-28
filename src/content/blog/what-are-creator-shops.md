@@ -49,7 +49,7 @@ Some creators also sell their own branded products through these shops, earning 
 
 ## How to Find the Best Creator Shops
 
-That's exactly why we built KOT. Instead of hunting across five different platforms, you can [browse our directory](/shops) to discover creator shops by platform, category, or niche.
+That's exactly why we built [Pick Your Shop](https://pickyour.shop). Instead of hunting across five different platforms, you can [browse our directory](/shops) to discover creator shops by platform, category, or niche.
 
 We verify every submission and only list active, quality storefronts.
 

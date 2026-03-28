@@ -5,5 +5,4 @@ Allow: /
 Disallow: /admin
 Disallow: /login
 
-# Sitemap location — update domain when live
-Sitemap: https://kot.example.com/sitemap-index.xml
+Sitemap: https://pickyour.shop/sitemap-index.xml

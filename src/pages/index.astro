@@ -33,6 +33,41 @@ const { data: featuredShops } = await supabase
 
 const shops = (featuredShops ?? []) as Shop[];
 
+// Trending: most clicked shops (needs clicks column)
+const { data: trendingData } = await supabase
+  .from('shops')
+  .select('*')
+  .eq('status', 'approved')
+  .gt('clicks', 0)
+  .order('clicks', { ascending: false })
+  .limit(4);
+
+const trendingShops = (trendingData ?? []) as Shop[];
+
+// New this week: approved in the last 7 days
+const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+const { data: newData } = await supabase
+  .from('shops')
+  .select('*')
+  .eq('status', 'approved')
+  .gte('created_at', oneWeekAgo)
+  .order('created_at', { ascending: false })
+  .limit(4);
+
+const newShops = (newData ?? []) as Shop[];
+
+// Shop of the Day: pick one deterministically based on the date
+const { data: allApproved } = await supabase
+  .from('shops')
+  .select('*')
+  .eq('status', 'approved')
+  .order('created_at', { ascending: true });
+
+const approvedList = (allApproved ?? []) as Shop[];
+const today = new Date();
+const dayIndex = (today.getFullYear() * 366 + today.getMonth() * 31 + today.getDate()) % (approvedList.length || 1);
+const shopOfTheDay = approvedList.length > 0 ? approvedList[dayIndex] : null;
+
 const platforms = Object.entries(platformDisplayNames).map(([key, name]) => ({
   key: key as Shop['platform'],
   name,
@@ -54,6 +89,24 @@ const platforms = Object.entries(platformDisplayNames).map(([key, name]) => ({
       <SearchBar client:only="react" />
     </div>
   </section>
+
+  {shopOfTheDay && (
+    <section class="max-w-7xl mx-auto px-4 pb-8">
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div class="flex-shrink-0">
+          <span class="text-3xl">⭐</span>
+        </div>
+        <div class="flex-grow">
+          <p class="text-xs font-semibold uppercase tracking-wide text-blue-600 mb-1">Shop of the Day</p>
+          <a href={`/shops/${shopOfTheDay.slug}`} class="text-xl font-bold hover:text-blue-600 transition">{shopOfTheDay.name}</a>
+          <p class="text-sm text-gray-600 mt-1">{shopOfTheDay.description}</p>
+        </div>
+        <a href={`/go/${shopOfTheDay.slug}`} class="flex-shrink-0 px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition">
+          Visit Shop →
+        </a>
+      </div>
+    </section>
+  )}
 
   <section class="max-w-7xl mx-auto px-4 pb-8">
     <div class="flex flex-wrap gap-2 justify-center mb-3">
@@ -85,6 +138,34 @@ const platforms = Object.entries(platformDisplayNames).map(([key, name]) => ({
       <p class="text-gray-500">No shops yet — be the first to submit one.</p>
     )}
   </section>
+
+  {trendingShops.length > 0 && (
+    <section class="max-w-7xl mx-auto px-4 pb-16">
+      <div class="flex items-center gap-2 mb-6">
+        <span class="text-2xl">🔥</span>
+        <h2 class="text-2xl font-bold">Trending Shops</h2>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {trendingShops.map(shop => (
+          <ShopCard shop={shop} />
+        ))}
+      </div>
+    </section>
+  )}
+
+  {newShops.length > 0 && (
+    <section class="max-w-7xl mx-auto px-4 pb-16">
+      <div class="flex items-center gap-2 mb-6">
+        <span class="text-2xl">✨</span>
+        <h2 class="text-2xl font-bold">New This Week</h2>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {newShops.map(shop => (
+          <ShopCard shop={shop} />
+        ))}
+      </div>
+    </section>
+  )}
 
   <section class="max-w-7xl mx-auto px-4 pb-16 text-center">
     <div class="bg-blue-50 rounded-2xl p-8">
