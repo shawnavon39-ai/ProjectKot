@@ -1,0 +1,112 @@
+---
+/*
+  category/[category].astro — filtered shop listing by category.
+
+  Server-rendered so new shops appear immediately after approval.
+  Each category gets its own indexable URL:
+    /category/fashion  →  ranks for "fashion creator shops"
+    /category/beauty   →  ranks for "beauty creator storefronts"
+
+  This is important for SEO — Google treats each URL as a separate
+  page that can rank independently. A single /shops page with
+  client-side filtering won't rank for category-specific searches.
+*/
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ShopCard from '../../components/ShopCard.astro';
+import { env } from 'cloudflare:workers';
+import { getSupabase } from '../../lib/supabase';
+import type { Shop } from '../../lib/types';
+
+const supabase = getSupabase(env);
+const { category } = Astro.params;
+
+const categoryMap: Record<string, string> = {
+  'fashion': 'Fashion',
+  'beauty': 'Beauty',
+  'tech': 'Tech',
+  'home': 'Home',
+  'food-drink': 'Food & Drink',
+  'fitness': 'Fitness',
+  'other': 'Other',
+};
+
+const dbCategory = categoryMap[category ?? ''];
+
+if (!dbCategory) {
+  return Astro.redirect('/shops', 307);
+}
+
+const { data } = await supabase
+  .from('shops')
+  .select('*')
+  .eq('status', 'approved')
+  .eq('category', dbCategory)
+  .order('created_at', { ascending: false });
+
+const shops = (data ?? []) as Shop[];
+
+const categoryDescriptions: Record<string, string> = {
+  'Fashion': 'Discover the best fashion creator shops across Amazon, TikTok, Instagram, and more.',
+  'Beauty': 'Find top beauty and skincare creator storefronts — curated picks from influencers who test what they recommend.',
+  'Tech': 'Browse tech creator shops for gadgets, accessories, and gear recommended by experts.',
+  'Home': 'Shop home decor, organisation, and lifestyle picks from the best home creator storefronts.',
+  'Food & Drink': 'Explore food and drink creator shops for kitchen gadgets, ingredients, and recipes.',
+  'Fitness': 'Find fitness creator shops for workout gear, supplements, and activewear.',
+  'Other': 'Browse creator shops across all categories.',
+};
+
+const description = categoryDescriptions[dbCategory] ?? `Browse ${dbCategory} creator shops.`;
+const allCategories = Object.entries(categoryMap);
+---
+
+<BaseLayout title={`${dbCategory} Shops`} description={description}>
+  <section class="max-w-7xl mx-auto px-4 py-12">
+    <!-- Breadcrumb -->
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="/" class="hover:text-gray-900">Home</a>
+      <span class="mx-2">›</span>
+      <a href="/shops" class="hover:text-gray-900">Shops</a>
+      <span class="mx-2">›</span>
+      <span class="text-gray-900">{dbCategory}</span>
+    </nav>
+
+    <h1 class="text-3xl font-bold mb-2">{dbCategory} Shops</h1>
+    <p class="text-gray-600 mb-8">{description}</p>
+
+    <!-- Category nav -->
+    <div class="flex flex-wrap gap-2 mb-8">
+      <a href="/shops" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">
+        All
+      </a>
+      {allCategories.map(([slug, name]) => (
+        <a
+          href={`/category/${slug}`}
+          class={`px-3 py-1.5 rounded-lg text-sm font-medium ${
+            slug === category
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          {name}
+        </a>
+      ))}
+    </div>
+
+    {shops.length > 0 ? (
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {shops.map(shop => (
+          <ShopCard shop={shop} />
+        ))}
+      </div>
+    ) : (
+      <div class="text-center py-12">
+        <p class="text-gray-500 text-lg mb-4">No {dbCategory.toLowerCase()} shops yet.</p>
+        <a href="/submit" class="text-blue-600 hover:underline font-medium">
+          Be the first to submit one →
+        </a>
+      </div>
+    )}
+  </section>
+</BaseLayout>
