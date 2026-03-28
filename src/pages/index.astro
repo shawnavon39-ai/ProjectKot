@@ -56,17 +56,26 @@ const { data: newData } = await supabase
 
 const newShops = (newData ?? []) as Shop[];
 
-// Shop of the Day: manual override, falls back to deterministic rotation
-const FEATURED_SLUG = 'allie-hunter';
+// Shop of the Day: date-based overrides, falls back to deterministic rotation
+const FEATURED_OVERRIDES: Record<string, string> = {
+  '2026-03-29': 'allie-hunter',
+};
 
-const { data: featuredShopData } = await supabase
-  .from('shops')
-  .select('*')
-  .eq('slug', FEATURED_SLUG)
-  .eq('status', 'approved')
-  .single();
+const today = new Date();
+const todayKey = today.toISOString().slice(0, 10);
+const overrideSlug = FEATURED_OVERRIDES[todayKey];
 
-let shopOfTheDay: Shop | null = (featuredShopData as Shop) ?? null;
+let shopOfTheDay: Shop | null = null;
+
+if (overrideSlug) {
+  const { data: featuredShopData } = await supabase
+    .from('shops')
+    .select('*')
+    .eq('slug', overrideSlug)
+    .eq('status', 'approved')
+    .single();
+  shopOfTheDay = (featuredShopData as Shop) ?? null;
+}
 
 if (!shopOfTheDay) {
   const { data: allApproved } = await supabase
@@ -76,7 +85,6 @@ if (!shopOfTheDay) {
     .order('created_at', { ascending: true });
 
   const approvedList = (allApproved ?? []) as Shop[];
-  const today = new Date();
   const dayIndex = (today.getFullYear() * 366 + today.getMonth() * 31 + today.getDate()) % (approvedList.length || 1);
   shopOfTheDay = approvedList.length > 0 ? approvedList[dayIndex] : null;
 }
