@@ -9,6 +9,7 @@ export interface Shop {
   id: string;
   created_at: string;
   name: string;
+  slug: string;
   platform: 'tiktok' | 'instagram' | 'youtube' | 'pinterest' | 'amazon';
   category: string;
   description: string | null;

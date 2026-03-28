@@ -71,8 +71,14 @@ export default function SubmitForm() {
     setStatus('submitting');
     setErrorMessage('');
 
+    const slug = state.name.trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+
     const { error } = await supabase.from('shops').insert({
       name: state.name.trim(),
+      slug,
       platform: state.platform,
       shop_url: state.shop_url.trim(),
       category: state.category,

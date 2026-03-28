@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Don't index admin or login pages
+Disallow: /admin
+Disallow: /login
+
+# Sitemap location — update domain when live
+Sitemap: https://kot.example.com/sitemap-index.xml

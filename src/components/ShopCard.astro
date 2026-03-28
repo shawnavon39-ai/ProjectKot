@@ -18,7 +18,7 @@ const displayName = platformDisplayNames[shop.platform];
 const colour = platformColours[shop.platform];
 ---
 
-<a href={shop.shop_url} target="_blank" rel="noopener noreferrer" class="block bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition group">
+<a href={`/shops/${shop.slug}`} class="block bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition group">
   <div class="flex items-start justify-between mb-3">
     <h3 class="font-semibold text-lg group-hover:text-blue-600 transition">{shop.name}</h3>
     <span class={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${colour}`}>

@@ -10,9 +10,23 @@
 interface Props {
   title: string;
   description?: string;
+  ogImage?: string;
+  ogType?: string;
 }
 
-const { title, description = "Discover creator shops across TikTok, Instagram, YouTube, Pinterest and Amazon in one place." } = Astro.props;
+const {
+  title,
+  description = "Discover creator shops across TikTok, Instagram, YouTube, Pinterest and Amazon in one place.",
+  ogImage = "/og-default.png",
+  ogType = "website",
+} = Astro.props;
+
+/*
+  Astro.url gives you the full URL of the current page at build time.
+  We use it for canonical URLs and Open Graph — both need absolute URLs.
+*/
+const canonicalUrl = Astro.url.href;
+const siteName = "KOT";
 
 import '../styles/global.css';
 import NavBar from '../components/NavBar';
@@ -26,7 +40,35 @@ import NavBar from '../components/NavBar';
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
+
+    <!-- Canonical URL — tells Google "this is THE url for this page" -->
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!--
+      Open Graph tags — control how the page looks when shared on
+      social media (Facebook, LinkedIn, iMessage, Slack, etc.)
+      Without these, platforms just show the URL as plain text.
+    -->
+    <meta property="og:title" content={`${title} | ${siteName}`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={new URL(ogImage, Astro.site).href} />
+    <meta property="og:site_name" content={siteName} />
+
+    <!-- Twitter/X card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={`${title} | ${siteName}`} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL(ogImage, Astro.site).href} />
+
     <title>{title} | KOT</title>
+
+    <!--
+      JSON-LD structured data slot — individual pages can inject
+      schema.org markup here via the "head" slot.
+    -->
+    <slot name="head" />
   </head>
   <body class="bg-gray-50 text-gray-900 min-h-screen">
     <!--
