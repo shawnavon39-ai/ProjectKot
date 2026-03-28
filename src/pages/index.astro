@@ -56,17 +56,30 @@ const { data: newData } = await supabase
 
 const newShops = (newData ?? []) as Shop[];
 
-// Shop of the Day: pick one deterministically based on the date
-const { data: allApproved } = await supabase
+// Shop of the Day: manual override, falls back to deterministic rotation
+const FEATURED_SLUG = 'allie-hunter';
+
+const { data: featuredShopData } = await supabase
   .from('shops')
   .select('*')
+  .eq('slug', FEATURED_SLUG)
   .eq('status', 'approved')
-  .order('created_at', { ascending: true });
+  .single();
 
-const approvedList = (allApproved ?? []) as Shop[];
-const today = new Date();
-const dayIndex = (today.getFullYear() * 366 + today.getMonth() * 31 + today.getDate()) % (approvedList.length || 1);
-const shopOfTheDay = approvedList.length > 0 ? approvedList[dayIndex] : null;
+let shopOfTheDay: Shop | null = (featuredShopData as Shop) ?? null;
+
+if (!shopOfTheDay) {
+  const { data: allApproved } = await supabase
+    .from('shops')
+    .select('*')
+    .eq('status', 'approved')
+    .order('created_at', { ascending: true });
+
+  const approvedList = (allApproved ?? []) as Shop[];
+  const today = new Date();
+  const dayIndex = (today.getFullYear() * 366 + today.getMonth() * 31 + today.getDate()) % (approvedList.length || 1);
+  shopOfTheDay = approvedList.length > 0 ? approvedList[dayIndex] : null;
+}
 
 const platforms = Object.entries(platformDisplayNames).map(([key, name]) => ({
   key: key as Shop['platform'],
