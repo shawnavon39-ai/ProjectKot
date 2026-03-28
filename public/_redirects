@@ -1,2 +1,0 @@
-# Redirect www to apex domain
-https://www.pickyour.shop/* https://pickyour.shop/:splat 301
