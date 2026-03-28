@@ -81,7 +81,7 @@ import NavBar from '../components/NavBar';
       client:load means it hydrates immediately (nav is above the fold).
     -->
     <header class="bg-white border-b border-gray-200">
-      <NavBar client:load />
+      <NavBar client:only="react" />
     </header>
 
     <main>
