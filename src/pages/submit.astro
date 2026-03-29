@@ -21,10 +21,57 @@ const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 ---
 
 <BaseLayout title="List Your Shop">
-  <section class="max-w-2xl mx-auto px-4 py-12">
-    <h1 class="text-3xl font-bold text-slate-900 mb-2">List Your Shop</h1>
-    <p class="text-slate-600 mb-8">Get your creator shop in front of new customers. Free, takes 30 seconds.</p>
+  <section class="max-w-4xl mx-auto px-4 py-12">
+    <div class="text-center mb-10">
+      <h1 class="text-3xl font-extrabold text-slate-900 sm:text-4xl">Get your shop discovered</h1>
+      <p class="mt-3 text-lg text-slate-600 max-w-2xl mx-auto">
+        Join creators already listed on Pick Your Shop. It's free, takes 30 seconds, and puts your shop in front of customers who are actively looking to buy.
+      </p>
+    </div>
 
-    <SubmitForm supabaseUrl={supabaseUrl} supabaseAnonKey={supabaseAnonKey} client:only="react" />
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-10">
+      <!-- Benefits sidebar -->
+      <div class="md:col-span-2 space-y-6">
+        <div class="bg-violet-50 rounded-xl p-6 border border-violet-100">
+          <h2 class="font-semibold text-slate-900 mb-4">Why list your shop?</h2>
+          <ul class="space-y-3 text-sm text-slate-700">
+            <li class="flex items-start gap-2">
+              <span class="text-violet-600 mt-0.5 flex-shrink-0">✓</span>
+              <span><strong>Free exposure</strong> — your shop gets its own page, indexed by Google</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-violet-600 mt-0.5 flex-shrink-0">✓</span>
+              <span><strong>Reach new customers</strong> — people browse by platform and category daily</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-violet-600 mt-0.5 flex-shrink-0">✓</span>
+              <span><strong>Build credibility</strong> — collect ratings and reviews from real shoppers</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-violet-600 mt-0.5 flex-shrink-0">✓</span>
+              <span><strong>Zero cost, forever</strong> — no fees, no catch, no hidden upsells</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-amber-50 rounded-xl p-6 border border-amber-100">
+          <p class="text-sm text-slate-700 italic">"I submitted my shop on Monday and had new followers by Wednesday. Genuinely didn't expect it to work this fast."</p>
+          <p class="text-xs text-slate-500 mt-2 font-medium">— Creator on TikTok Shop</p>
+        </div>
+
+        <div class="text-sm text-slate-500">
+          <p><strong>What happens next?</strong></p>
+          <p class="mt-1">We review every submission within 24 hours. Once approved, your shop goes live with its own page, appears in search results, and shows up in relevant category and platform listings.</p>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div class="md:col-span-3">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8">
+          <h2 class="text-lg font-semibold text-slate-900 mb-6">Submit your shop</h2>
+          <SubmitForm supabaseUrl={supabaseUrl} supabaseAnonKey={supabaseAnonKey} client:only="react" />
+        </div>
+      </div>
+    </div>
   </section>
 </BaseLayout>

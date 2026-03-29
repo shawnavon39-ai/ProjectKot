@@ -44,18 +44,6 @@ const { data: trendingData } = await supabase
 
 const trendingShops = (trendingData ?? []) as Shop[];
 
-// New this week: approved in the last 7 days
-const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-const { data: newData } = await supabase
-  .from('shops')
-  .select('*')
-  .eq('status', 'approved')
-  .gte('created_at', oneWeekAgo)
-  .order('created_at', { ascending: false })
-  .limit(4);
-
-const newShops = (newData ?? []) as Shop[];
-
 // Shop of the Day: date-based overrides, falls back to deterministic rotation
 const FEATURED_OVERRIDES: Record<string, string> = {
   '2026-03-29': 'allie-hunter',
@@ -111,34 +99,36 @@ const platforms = Object.entries(platformDisplayNames).map(([key, name]) => ({
   })} />
 
   <!-- Hero -->
-  <section class="max-w-7xl mx-auto px-4 pt-20 pb-16 text-center">
-    <h1 class="text-4xl font-extrabold tracking-tight sm:text-6xl text-slate-900">
-      Find your next<br />
-      <span class="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">favourite shop.</span>
+  <section class="max-w-7xl mx-auto px-4 pt-12 pb-10 text-center">
+    <h1 class="text-3xl font-extrabold tracking-tight sm:text-5xl text-slate-900">
+      Find your next <span class="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">favourite shop</span>
     </h1>
-    <p class="mt-5 text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-      The best creator shops from TikTok, Amazon, Instagram and more — curated, rated, and easy to browse.
+    <p class="mt-3 text-base text-slate-600 max-w-xl mx-auto">
+      Creator shops from TikTok, Amazon, Instagram and more — curated, rated, and easy to browse.
     </p>
 
-    <div class="mt-10 max-w-xl mx-auto">
+    <div class="mt-6 max-w-xl mx-auto">
       <SearchBar supabaseUrl={env.PUBLIC_SUPABASE_URL} supabaseAnonKey={env.PUBLIC_SUPABASE_ANON_KEY} client:only="react" />
     </div>
 
-    <!-- Platform + category pills -->
-    <div class="mt-8 flex flex-wrap gap-2 justify-center">
+    <!-- Platform pills -->
+    <div class="mt-6 flex flex-wrap gap-2 justify-center">
       {platforms.map(p => (
-        <a href={`/shops?platform=${p.key}`} class={`px-3 py-1 rounded-full text-sm font-medium ${p.colour} hover:opacity-80 transition`}>
+        <a href={`/shops?platform=${p.key}`} class={`px-3.5 py-1.5 rounded-full text-sm font-semibold ${p.colour} hover:opacity-80 transition shadow-sm`}>
           {p.name}
         </a>
       ))}
     </div>
-    <div class="mt-3 flex flex-wrap gap-2 justify-center">
-      <a href="/category/fashion" class="px-3 py-1 rounded-full text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Fashion</a>
-      <a href="/category/beauty" class="px-3 py-1 rounded-full text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Beauty</a>
-      <a href="/category/tech" class="px-3 py-1 rounded-full text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Tech</a>
-      <a href="/category/home" class="px-3 py-1 rounded-full text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Home</a>
-      <a href="/category/fitness" class="px-3 py-1 rounded-full text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Fitness</a>
-      <a href="/category/food-drink" class="px-3 py-1 rounded-full text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Food & Drink</a>
+
+    <!-- Category pills with leading text -->
+    <p class="mt-5 text-xs font-medium uppercase tracking-wide text-slate-400">Browse by category</p>
+    <div class="mt-2 flex flex-wrap gap-2 justify-center">
+      <a href="/category/fashion" class="px-3.5 py-1.5 rounded-full text-sm font-semibold bg-slate-100 text-slate-700 hover:bg-violet-100 hover:text-violet-700 transition shadow-sm">👗 Fashion</a>
+      <a href="/category/beauty" class="px-3.5 py-1.5 rounded-full text-sm font-semibold bg-slate-100 text-slate-700 hover:bg-violet-100 hover:text-violet-700 transition shadow-sm">💄 Beauty</a>
+      <a href="/category/tech" class="px-3.5 py-1.5 rounded-full text-sm font-semibold bg-slate-100 text-slate-700 hover:bg-violet-100 hover:text-violet-700 transition shadow-sm">💻 Tech</a>
+      <a href="/category/home" class="px-3.5 py-1.5 rounded-full text-sm font-semibold bg-slate-100 text-slate-700 hover:bg-violet-100 hover:text-violet-700 transition shadow-sm">🏠 Home</a>
+      <a href="/category/fitness" class="px-3.5 py-1.5 rounded-full text-sm font-semibold bg-slate-100 text-slate-700 hover:bg-violet-100 hover:text-violet-700 transition shadow-sm">💪 Fitness</a>
+      <a href="/category/food-drink" class="px-3.5 py-1.5 rounded-full text-sm font-semibold bg-slate-100 text-slate-700 hover:bg-violet-100 hover:text-violet-700 transition shadow-sm">🍕 Food & Drink</a>
     </div>
   </section>
 
@@ -195,22 +185,27 @@ const platforms = Object.entries(platformDisplayNames).map(([key, name]) => ({
     </section>
   )}
 
-  <!-- New This Week -->
-  {newShops.length > 0 && (
-    <section class="max-w-7xl mx-auto px-4 pb-16">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-2xl font-bold text-slate-900">
-          <span class="text-violet-600">New</span> This Week
-        </h2>
-        <a href="/shops" class="text-sm text-violet-600 hover:text-violet-700 font-medium transition">View all →</a>
+  <!-- How It Works -->
+  <section class="max-w-7xl mx-auto px-4 pb-16">
+    <h2 class="text-2xl font-bold text-slate-900 text-center mb-8">How It Works</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
+      <div class="text-center">
+        <div class="w-14 h-14 rounded-2xl bg-violet-100 text-violet-600 flex items-center justify-center mx-auto mb-4 text-2xl font-bold">1</div>
+        <h3 class="font-semibold text-slate-900 mb-1">Browse or Search</h3>
+        <p class="text-sm text-slate-600">Filter by platform, category, or search for shops by name.</p>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {newShops.map(shop => (
-          <ShopCard shop={shop} />
-        ))}
+      <div class="text-center">
+        <div class="w-14 h-14 rounded-2xl bg-violet-100 text-violet-600 flex items-center justify-center mx-auto mb-4 text-2xl font-bold">2</div>
+        <h3 class="font-semibold text-slate-900 mb-1">Discover & Compare</h3>
+        <p class="text-sm text-slate-600">Read reviews, check ratings, and find creators you'll love.</p>
       </div>
-    </section>
-  )}
+      <div class="text-center">
+        <div class="w-14 h-14 rounded-2xl bg-violet-100 text-violet-600 flex items-center justify-center mx-auto mb-4 text-2xl font-bold">3</div>
+        <h3 class="font-semibold text-slate-900 mb-1">Visit & Shop</h3>
+        <p class="text-sm text-slate-600">Click through to the creator's shop and start shopping.</p>
+      </div>
+    </div>
+  </section>
 
   <!-- Bottom CTA -->
   <section class="max-w-7xl mx-auto px-4 pb-16 text-center">

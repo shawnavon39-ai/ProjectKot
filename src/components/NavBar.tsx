@@ -58,9 +58,9 @@ export default function NavBar({ supabaseUrl, supabaseAnonKey }: Props) {
       </button>
 
       {/* Desktop nav */}
-      <div className="hidden sm:flex items-center gap-6">
-        <a href="/shops" className="text-sm text-slate-600 hover:text-slate-900 transition font-medium">Browse</a>
-        <a href="/blog" className="text-sm text-slate-600 hover:text-slate-900 transition font-medium">Blog</a>
+      <div className="hidden sm:flex items-center gap-5">
+        <a href="/shops" className="text-sm text-slate-700 hover:text-violet-600 transition font-semibold">Browse Shops</a>
+        <a href="/blog" className="text-sm text-slate-700 hover:text-violet-600 transition font-semibold">Blog</a>
         <a
           href="/submit"
           className="text-sm px-4 py-2 bg-violet-600 text-white rounded-lg font-medium hover:bg-violet-700 transition"

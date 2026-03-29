@@ -9,17 +9,44 @@ interface Props {
 const { shop } = Astro.props;
 const displayName = platformDisplayNames[shop.platform];
 const colour = platformColours[shop.platform];
+
+/*
+  Grab the shop's favicon via Google's free service.
+  This gives each card a visual identity without needing uploaded images.
+  Falls back gracefully to a default globe icon if the favicon fails to load.
+*/
+let faviconUrl = '';
+try {
+  const domain = new URL(shop.shop_url).hostname;
+  faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+} catch {
+  // Invalid URL — skip favicon
+}
 ---
 
 <a
   href={`/shops/${shop.slug}`}
   class="block bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 p-5 group border-l-4 border-l-violet-500"
 >
-  <div class="flex items-start justify-between mb-3">
-    <h3 class="font-semibold text-lg text-slate-900 group-hover:text-violet-600 transition">{shop.name}</h3>
-    <span class={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${colour}`}>
-      {displayName}
-    </span>
+  <div class="flex items-start gap-3 mb-3">
+    {faviconUrl && (
+      <img
+        src={faviconUrl}
+        alt=""
+        width="32"
+        height="32"
+        class="w-8 h-8 rounded-lg bg-slate-100 flex-shrink-0 mt-0.5"
+        loading="lazy"
+      />
+    )}
+    <div class="flex-grow min-w-0">
+      <div class="flex items-start justify-between gap-2">
+        <h3 class="font-semibold text-lg text-slate-900 group-hover:text-violet-600 transition truncate">{shop.name}</h3>
+        <span class={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap flex-shrink-0 ${colour}`}>
+          {displayName}
+        </span>
+      </div>
+    </div>
   </div>
   <p class="text-sm text-slate-600 mb-3 line-clamp-2">{shop.description}</p>
   <div class="flex items-center justify-between">
