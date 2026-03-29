@@ -16,11 +16,19 @@ import type { Shop } from '../lib/types';
 
 const supabase = getSupabase(env);
 
-const { data } = await supabase
+const url = new URL(Astro.request.url);
+const activePlatform = url.searchParams.get('platform');
+
+let query = supabase
   .from('shops')
   .select('*')
-  .eq('status', 'approved')
-  .order('created_at', { ascending: false });
+  .eq('status', 'approved');
+
+if (activePlatform) {
+  query = query.eq('platform', activePlatform);
+}
+
+const { data } = await query.order('created_at', { ascending: false });
 
 const shops = (data ?? []) as Shop[];
 
@@ -44,9 +52,9 @@ const categories = [
       <span class="text-xs font-medium text-slate-500 uppercase tracking-wide">Platform</span>
     </div>
     <div class="flex flex-wrap gap-2 mb-6">
-      <a href="/shops" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-violet-600 text-white">All</a>
+      <a href="/shops" class={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${!activePlatform ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>All</a>
       {Object.entries(platformDisplayNames).map(([key, name]) => (
-        <a href={`/shops?platform=${key}`} class="px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+        <a href={`/shops?platform=${key}`} class={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${activePlatform === key ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
           {name}
         </a>
       ))}
