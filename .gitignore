@@ -18,6 +18,11 @@ pnpm-debug.log*
 # NOTE: .env.production is NOT ignored — it only contains PUBLIC_ vars
 # (same values already in wrangler.toml). Vite needs it at build time.
 
+# discovery pipeline state
+scripts/.discovered-urls.json
+scripts/discovered-shops.json
+scripts/scraped-shops.json
+
 # macOS-specific files
 .DS_Store
 
