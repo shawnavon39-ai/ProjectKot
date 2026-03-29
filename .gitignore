@@ -13,9 +13,10 @@ yarn-error.log*
 pnpm-debug.log*
 
 
-# environment variables
+# environment variables (secrets)
 .env
-.env.production
+# NOTE: .env.production is NOT ignored — it only contains PUBLIC_ vars
+# (same values already in wrangler.toml). Vite needs it at build time.
 
 # macOS-specific files
 .DS_Store
