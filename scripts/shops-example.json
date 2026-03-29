@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Jane's Style Picks",
+    "shop_url": "https://www.amazon.com/shop/janestyle",
+    "platform": "amazon",
+    "category": "fashion",
+    "description": "Curated fashion finds from trending creators"
+  },
+  {
+    "name": "TechBro Essentials",
+    "shop_url": "https://www.amazon.com/shop/techbroessentials",
+    "platform": "amazon",
+    "category": "tech",
+    "description": "Top tech gadgets and desk setups"
+  },
+  {
+    "name": "CozyHome by Sarah",
+    "shop_url": "https://www.amazon.com/shop/cozyhomesarah",
+    "platform": "amazon",
+    "category": "home",
+    "description": "Home decor and organisation essentials"
+  }
+]

@@ -13,6 +13,7 @@
   This is ideal for SEO: fast, cacheable, fully indexable.
 */
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import AdUnit from '../../components/AdUnit.astro';
 import { getCollection, render } from 'astro:content';
 
 export const prerender = true;
@@ -103,6 +104,8 @@ const breadcrumbLd = {
     <div class="prose prose-slate max-w-none">
       <Content />
     </div>
+
+    <AdUnit />
 
     <!-- CTA -->
     <div class="mt-12 bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-100 rounded-xl p-6 text-center">

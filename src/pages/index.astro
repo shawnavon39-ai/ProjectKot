@@ -16,6 +16,7 @@ export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ShopCard from '../components/ShopCard.astro';
+import AdUnit from '../components/AdUnit.astro';
 import SearchBar from '../components/SearchBar';
 import { env } from 'cloudflare:workers';
 import { getSupabase } from '../lib/supabase';
@@ -166,6 +167,11 @@ const platforms = Object.entries(platformDisplayNames).map(([key, name]) => ({
     ) : (
       <p class="text-slate-500">No shops yet — be the first to submit one.</p>
     )}
+  </section>
+
+  <!-- Ad between sections -->
+  <section class="max-w-7xl mx-auto px-4 pb-8">
+    <AdUnit />
   </section>
 
   <!-- Trending Shops -->

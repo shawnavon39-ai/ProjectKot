@@ -9,6 +9,7 @@ export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ShopCard from '../components/ShopCard.astro';
+import AdUnit from '../components/AdUnit.astro';
 import { env } from 'cloudflare:workers';
 import { getSupabase } from '../lib/supabase';
 import { platformDisplayNames } from '../lib/types';
@@ -72,6 +73,8 @@ const categories = [
       ))}
     </div>
 
+    <AdUnit className="mb-8" />
+
     {shops.length > 0 ? (
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {shops.map(shop => (
@@ -81,5 +84,7 @@ const categories = [
     ) : (
       <p class="text-slate-500">No shops found.</p>
     )}
+
+    <AdUnit className="mt-8" />
   </section>
 </BaseLayout>
