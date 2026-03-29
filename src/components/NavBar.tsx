@@ -2,16 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { User } from '@supabase/supabase-js';
 
-function getSupabase() {
-  return createClient(
-    import.meta.env.PUBLIC_SUPABASE_URL,
-    import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
-  );
+interface Props {
+  supabaseUrl: string;
+  supabaseAnonKey: string;
 }
 
-export default function NavBar() {
+export default function NavBar({ supabaseUrl, supabaseAnonKey }: Props) {
   const supabaseRef = useRef<SupabaseClient | null>(null);
-  if (!supabaseRef.current) supabaseRef.current = getSupabase();
+  if (!supabaseRef.current) supabaseRef.current = createClient(supabaseUrl, supabaseAnonKey);
   const supabase = supabaseRef.current;
 
   const [user, setUser] = useState<User | null>(null);

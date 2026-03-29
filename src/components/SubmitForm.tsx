@@ -10,11 +10,9 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { User } from '@supabase/supabase-js';
 import type { Shop } from '../lib/types';
 
-function getSupabase() {
-  return createClient(
-    import.meta.env.PUBLIC_SUPABASE_URL,
-    import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
-  );
+interface SubmitFormProps {
+  supabaseUrl: string;
+  supabaseAnonKey: string;
 }
 
 type FormState = {
@@ -50,9 +48,9 @@ function formReducer(state: FormState, action: FormAction): FormState {
 
 type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
 
-export default function SubmitForm() {
+export default function SubmitForm({ supabaseUrl, supabaseAnonKey }: SubmitFormProps) {
   const supabaseRef = useRef<SupabaseClient | null>(null);
-  if (!supabaseRef.current) supabaseRef.current = getSupabase();
+  if (!supabaseRef.current) supabaseRef.current = createClient(supabaseUrl, supabaseAnonKey);
   const supabase = supabaseRef.current;
 
   const [state, dispatch] = useReducer(formReducer, initialState);

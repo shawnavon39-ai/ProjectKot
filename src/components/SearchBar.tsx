@@ -26,16 +26,14 @@ const platformNames: Record<string, string> = {
   amazon: 'Amazon Influencer',
 };
 
-function getSupabase() {
-  return createClient(
-    import.meta.env.PUBLIC_SUPABASE_URL,
-    import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
-  );
+interface Props {
+  supabaseUrl: string;
+  supabaseAnonKey: string;
 }
 
-export default function SearchBar() {
+export default function SearchBar({ supabaseUrl, supabaseAnonKey }: Props) {
   const supabaseRef = useRef<SupabaseClient | null>(null);
-  if (!supabaseRef.current) supabaseRef.current = getSupabase();
+  if (!supabaseRef.current) supabaseRef.current = createClient(supabaseUrl, supabaseAnonKey);
   const supabase = supabaseRef.current;
 
   const [query, setQuery] = useState('');

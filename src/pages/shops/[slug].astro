@@ -178,7 +178,7 @@ const breadcrumbLd = {
 
       <div class="bg-white rounded-xl shadow-sm p-6">
         <h3 class="text-lg font-semibold text-slate-900 mb-4">Leave a Review</h3>
-        <ReviewForm shopId={shop.id} client:only="react" />
+        <ReviewForm shopId={shop.id} supabaseUrl={env.PUBLIC_SUPABASE_URL} supabaseAnonKey={env.PUBLIC_SUPABASE_ANON_KEY} client:only="react" />
       </div>
     </div>
   </section>

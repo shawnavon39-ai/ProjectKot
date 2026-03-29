@@ -121,7 +121,7 @@ const platforms = Object.entries(platformDisplayNames).map(([key, name]) => ({
     </p>
 
     <div class="mt-10 max-w-xl mx-auto">
-      <SearchBar client:only="react" />
+      <SearchBar supabaseUrl={env.PUBLIC_SUPABASE_URL} supabaseAnonKey={env.PUBLIC_SUPABASE_ANON_KEY} client:only="react" />
     </div>
 
     <!-- Platform + category pills -->

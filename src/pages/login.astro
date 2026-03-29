@@ -1,10 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import AuthForm from '../components/AuthForm';
+
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 ---
 
 <BaseLayout title="Sign In">
   <section class="max-w-2xl mx-auto px-4 py-12">
-    <AuthForm client:only="react" />
+    <AuthForm supabaseUrl={supabaseUrl} supabaseAnonKey={supabaseAnonKey} client:only="react" />
   </section>
 </BaseLayout>

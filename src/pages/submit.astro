@@ -15,6 +15,9 @@
 */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SubmitForm from '../components/SubmitForm';
+
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 ---
 
 <BaseLayout title="List Your Shop">
@@ -22,6 +25,6 @@ import SubmitForm from '../components/SubmitForm';
     <h1 class="text-3xl font-bold text-slate-900 mb-2">List Your Shop</h1>
     <p class="text-slate-600 mb-8">Get your creator shop in front of new customers. Free, takes 30 seconds.</p>
 
-    <SubmitForm client:only="react" />
+    <SubmitForm supabaseUrl={supabaseUrl} supabaseAnonKey={supabaseAnonKey} client:only="react" />
   </section>
 </BaseLayout>

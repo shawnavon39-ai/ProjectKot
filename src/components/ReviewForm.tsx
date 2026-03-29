@@ -10,18 +10,13 @@ import type { User } from '@supabase/supabase-js';
 
 interface Props {
   shopId: string;
+  supabaseUrl: string;
+  supabaseAnonKey: string;
 }
 
-function getSupabase() {
-  return createClient(
-    import.meta.env.PUBLIC_SUPABASE_URL,
-    import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
-  );
-}
-
-export default function ReviewForm({ shopId }: Props) {
+export default function ReviewForm({ shopId, supabaseUrl, supabaseAnonKey }: Props) {
   const supabaseRef = useRef<SupabaseClient | null>(null);
-  if (!supabaseRef.current) supabaseRef.current = getSupabase();
+  if (!supabaseRef.current) supabaseRef.current = createClient(supabaseUrl, supabaseAnonKey);
   const supabase = supabaseRef.current;
 
   const [user, setUser] = useState<User | null>(null);

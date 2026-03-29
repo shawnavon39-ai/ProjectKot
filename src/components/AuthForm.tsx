@@ -11,18 +11,16 @@
 import { useState, useRef } from 'react';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-function getSupabase() {
-  return createClient(
-    import.meta.env.PUBLIC_SUPABASE_URL,
-    import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
-  );
+interface Props {
+  supabaseUrl: string;
+  supabaseAnonKey: string;
 }
 
 type Mode = 'signin' | 'signup';
 
-export default function AuthForm() {
+export default function AuthForm({ supabaseUrl, supabaseAnonKey }: Props) {
   const supabaseRef = useRef<SupabaseClient | null>(null);
-  if (!supabaseRef.current) supabaseRef.current = getSupabase();
+  if (!supabaseRef.current) supabaseRef.current = createClient(supabaseUrl, supabaseAnonKey);
   const supabase = supabaseRef.current;
 
   const [mode, setMode] = useState<Mode>('signin');
