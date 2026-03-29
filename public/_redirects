@@ -1,0 +1,2 @@
+# Redirect common sitemap path to Astro's generated sitemap
+/sitemap.xml /sitemap-index.xml 301

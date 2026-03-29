@@ -23,10 +23,14 @@ import { platformDisplayNames } from '../lib/types';
 import type { Shop } from '../lib/types';
 
 const ADMIN_PASSWORD = (env as any).ADMIN_PASSWORD ?? import.meta.env.ADMIN_PASSWORD;
-const supabaseAdmin = createClient(
-  (env as any).PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL,
-  (env as any).SUPABASE_SERVICE_ROLE_KEY ?? import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
-);
+const serviceRoleKey = (env as any).SUPABASE_SERVICE_ROLE_KEY ?? import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseUrl = (env as any).PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL;
+
+if (!ADMIN_PASSWORD || !serviceRoleKey) {
+  return new Response('Admin not configured', { status: 503 });
+}
+
+const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 
 // Check for password in cookie (set after login)
 const cookie = Astro.request.headers.get('cookie') ?? '';
