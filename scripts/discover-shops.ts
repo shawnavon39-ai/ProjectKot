@@ -390,7 +390,7 @@ async function main() {
       description: shop.description,
       followers: null,
       status: "pending",
-      submitted_by: "discover-pipeline",
+      submitted_by: null,
       clicks: 0,
       avg_rating: 0,
       review_count: 0,
