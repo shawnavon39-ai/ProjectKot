@@ -17,16 +17,14 @@
 export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { env } from 'cloudflare:workers';
 import { createClient } from '@supabase/supabase-js';
 import { platformDisplayNames } from '../lib/types';
 import type { Shop } from '../lib/types';
 
-const runtime = Astro.locals.runtime as any;
-const runtimeEnv = runtime?.env ?? {};
-
-const ADMIN_PASSWORD = runtimeEnv.ADMIN_PASSWORD ?? import.meta.env.ADMIN_PASSWORD;
-const serviceRoleKey = runtimeEnv.SUPABASE_SERVICE_ROLE_KEY ?? import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
-const supabaseUrl = runtimeEnv.PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL;
+const ADMIN_PASSWORD = (env as any).ADMIN_PASSWORD ?? import.meta.env.ADMIN_PASSWORD;
+const serviceRoleKey = (env as any).SUPABASE_SERVICE_ROLE_KEY ?? import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseUrl = (env as any).PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL;
 
 if (!ADMIN_PASSWORD || !serviceRoleKey) {
   return new Response('Admin not configured', { status: 503 });
