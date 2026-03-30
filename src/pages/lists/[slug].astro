@@ -1,0 +1,114 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ShopCard from '../../components/ShopCard.astro';
+import { env } from 'cloudflare:workers';
+import { getSupabase } from '../../lib/supabase';
+import { getListBySlug, curatedLists } from '../../lib/lists';
+import type { Shop } from '../../lib/types';
+
+const { slug } = Astro.params;
+const list = getListBySlug(slug!);
+
+if (!list) {
+  return Astro.redirect('/lists', 307);
+}
+
+const supabase = getSupabase(env);
+
+let query = supabase
+  .from('shops')
+  .select('*')
+  .eq('status', 'approved');
+
+if (list.platform) query = query.eq('platform', list.platform);
+if (list.category) query = query.eq('category', list.category);
+
+if (list.sort === 'rating') {
+  query = query.order('avg_rating', { ascending: false });
+} else if (list.sort === 'popular') {
+  query = query.order('clicks', { ascending: false });
+} else {
+  query = query.order('created_at', { ascending: false });
+}
+
+query = query.limit(list.limit);
+
+const { data } = await query;
+const shops = (data ?? []) as Shop[];
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": list.title,
+  "description": list.description,
+  "url": `https://pickyour.shop/lists/${list.slug}`,
+  "numberOfItems": shops.length,
+  "itemListElement": shops.map((shop, i) => ({
+    "@type": "ListItem",
+    "position": i + 1,
+    "name": shop.name,
+    "url": `https://pickyour.shop/shops/${shop.slug}`,
+  })),
+};
+
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://pickyour.shop" },
+    { "@type": "ListItem", "position": 2, "name": "Lists", "item": "https://pickyour.shop/lists" },
+    { "@type": "ListItem", "position": 3, "name": list.title },
+  ],
+};
+---
+
+<BaseLayout
+  title={list.title}
+  description={list.description}
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
+
+  <section class="max-w-7xl mx-auto px-4 py-12">
+    <nav class="text-sm text-slate-500 mb-6">
+      <a href="/" class="hover:text-slate-900 transition">Home</a>
+      <span class="mx-2">›</span>
+      <a href="/lists" class="hover:text-slate-900 transition">Lists</a>
+      <span class="mx-2">›</span>
+      <span class="text-slate-900">{list.title}</span>
+    </nav>
+
+    <h1 class="text-3xl font-bold text-slate-900 mb-2">{list.title}</h1>
+    <p class="text-slate-600 mb-8">{list.description}</p>
+
+    <!-- Other lists -->
+    <div class="mb-3">
+      <span class="text-xs font-medium text-slate-500 uppercase tracking-wide">More lists</span>
+    </div>
+    <div class="flex flex-wrap gap-2 mb-8">
+      {curatedLists.filter(l => l.slug !== list.slug).map(l => (
+        <a
+          href={`/lists/${l.slug}`}
+          class="px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition"
+        >
+          {l.title}
+        </a>
+      ))}
+    </div>
+
+    <p class="text-sm text-slate-500 mb-6">{shops.length} shop{shops.length !== 1 ? 's' : ''}</p>
+
+    {shops.length > 0 ? (
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {shops.map(shop => <ShopCard shop={shop} />)}
+      </div>
+    ) : (
+      <div class="text-center py-12">
+        <p class="text-slate-500 text-lg mb-4">No shops in this list yet — check back soon.</p>
+        <a href="/submit" class="text-violet-600 hover:text-violet-700 font-medium transition">Submit a shop →</a>
+      </div>
+    )}
+  </section>
+</BaseLayout>

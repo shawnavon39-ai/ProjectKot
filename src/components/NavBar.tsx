@@ -60,6 +60,7 @@ export default function NavBar({ supabaseUrl, supabaseAnonKey }: Props) {
       {/* Desktop nav */}
       <div className="hidden sm:flex items-center gap-5">
         <a href="/shops" className="text-sm text-slate-700 hover:text-violet-600 transition font-semibold">Browse Shops</a>
+        <a href="/lists" className="text-sm text-slate-700 hover:text-violet-600 transition font-semibold">Lists</a>
         <a href="/blog" className="text-sm text-slate-700 hover:text-violet-600 transition font-semibold">Blog</a>
         <a
           href="/submit"
@@ -97,6 +98,7 @@ export default function NavBar({ supabaseUrl, supabaseAnonKey }: Props) {
         <div className="absolute top-full left-0 right-0 bg-white border-b border-slate-200 shadow-lg sm:hidden z-50">
           <div className="flex flex-col px-4 py-3 gap-3">
             <a href="/shops" className="text-sm text-slate-700 font-medium py-1">Browse</a>
+            <a href="/lists" className="text-sm text-slate-700 font-medium py-1">Lists</a>
             <a href="/blog" className="text-sm text-slate-700 font-medium py-1">Blog</a>
             <a
               href="/submit"

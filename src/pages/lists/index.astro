@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { curatedLists } from '../../lib/lists';
+
+const sortLabels = {
+  rating: 'Top Rated',
+  popular: 'Most Popular',
+  newest: 'Newest',
+};
+---
+
+<BaseLayout
+  title="Curated Shop Lists"
+  description="Hand-picked lists of the best creator shops across TikTok, Amazon, Instagram, and more — sorted by rating, popularity, and category."
+>
+  <section class="max-w-4xl mx-auto px-4 py-12">
+    <nav class="text-sm text-slate-500 mb-6">
+      <a href="/" class="hover:text-slate-900 transition">Home</a>
+      <span class="mx-2">›</span>
+      <span class="text-slate-900">Lists</span>
+    </nav>
+
+    <h1 class="text-3xl font-bold text-slate-900 mb-2">Curated Shop Lists</h1>
+    <p class="text-slate-600 mb-8">Hand-picked collections of the best creator shops, updated as new shops are added.</p>
+
+    <div class="space-y-4">
+      {curatedLists.map(list => (
+        <a
+          href={`/lists/${list.slug}`}
+          class="block bg-white rounded-xl shadow-sm p-6 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group border-l-4 border-l-violet-500"
+        >
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-semibold text-slate-900 group-hover:text-violet-600 transition mb-1">{list.title}</h2>
+              <p class="text-slate-600 text-sm mb-3">{list.description}</p>
+              <div class="flex flex-wrap items-center gap-2 text-xs">
+                {list.platform && (
+                  <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">{list.platform}</span>
+                )}
+                {list.category && (
+                  <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">{list.category}</span>
+                )}
+                <span class="bg-violet-50 text-violet-700 px-2 py-0.5 rounded-full">{sortLabels[list.sort]}</span>
+              </div>
+            </div>
+            <span class="text-sm text-violet-600 opacity-0 group-hover:opacity-100 transition font-medium mt-1 whitespace-nowrap">View list →</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
