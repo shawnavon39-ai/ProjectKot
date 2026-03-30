@@ -54,17 +54,52 @@ const maxPages = Math.min(
 
 // Search queries — creator-focused to surface real influencers, not generic storefronts
 const SEARCH_QUERIES = [
-  // Creator-linked category queries
-  { query: "site:amazon.com/shop fashion influencer tiktok outfit haul", category: "fashion" },
-  { query: "site:amazon.com/shop beauty influencer skincare routine instagram", category: "beauty" },
-  { query: "site:amazon.com/shop tech youtuber setup desk essentials", category: "tech" },
-  { query: "site:amazon.com/shop home decor blogger interior instagram", category: "home" },
-  { query: "site:amazon.com/shop fitness coach workout routine youtube", category: "fitness" },
-  { query: "site:amazon.com/shop food blogger recipe cooking youtube", category: "food-drink" },
-  // Trending / viral discovery
-  { query: "site:amazon.com/shop tiktok viral trending tiktokmademebuyit", category: "fashion" },
-  { query: "site:amazon.com/shop amazon finds viral tiktok 2025", category: "beauty" },
-  { query: "site:amazon.com/shop my storefront followers picks", category: "home" },
+  // Amazon — creator-linked
+  { query: "site:amazon.com/shop fashion influencer tiktok outfit haul", category: "fashion", platform: "amazon" as const },
+  { query: "site:amazon.com/shop beauty influencer skincare routine instagram", category: "beauty", platform: "amazon" as const },
+  { query: "site:amazon.com/shop tech youtuber setup desk essentials", category: "tech", platform: "amazon" as const },
+  { query: "site:amazon.com/shop home decor blogger interior instagram", category: "home", platform: "amazon" as const },
+  { query: "site:amazon.com/shop fitness coach workout routine youtube", category: "fitness", platform: "amazon" as const },
+  { query: "site:amazon.com/shop food blogger recipe cooking youtube", category: "food-drink", platform: "amazon" as const },
+  { query: "site:amazon.com/shop tiktok viral trending tiktokmademebuyit", category: "fashion", platform: "amazon" as const },
+  { query: "site:amazon.com/shop amazon finds viral tiktok 2025", category: "beauty", platform: "amazon" as const },
+  { query: "site:amazon.com/shop my storefront followers picks", category: "home", platform: "amazon" as const },
+  // TikTok — creator profiles with shops
+  { query: "site:tiktok.com/@ fashion creator haul outfit style", category: "fashion", platform: "tiktok" as const },
+  { query: "site:tiktok.com/@ beauty skincare makeup creator routine", category: "beauty", platform: "tiktok" as const },
+  { query: "site:tiktok.com/@ tech gadgets setup creator review", category: "tech", platform: "tiktok" as const },
+  { query: "site:tiktok.com/@ home decor interior creator aesthetic", category: "home", platform: "tiktok" as const },
+  { query: "site:tiktok.com/@ fitness workout creator gym routine", category: "fitness", platform: "tiktok" as const },
+  // YouTube — creator channels with shop/merch
+  { query: "site:youtube.com/@ tech reviewer setup essentials merch", category: "tech", platform: "youtube" as const },
+  { query: "site:youtube.com/@ beauty makeup skincare youtuber shop", category: "beauty", platform: "youtube" as const },
+  { query: "site:youtube.com/@ fitness workout youtuber channel shop", category: "fitness", platform: "youtube" as const },
+  { query: "site:youtube.com/@ fashion style haul youtuber shop", category: "fashion", platform: "youtube" as const },
+  { query: "site:youtube.com/@ food cooking recipe youtuber merch", category: "food-drink", platform: "youtube" as const },
+  // Etsy — handmade and craft creator shops
+  { query: "site:etsy.com/shop fashion clothing handmade creator", category: "fashion", platform: "etsy" as const },
+  { query: "site:etsy.com/shop beauty skincare handmade natural creator", category: "beauty", platform: "etsy" as const },
+  { query: "site:etsy.com/shop home decor handmade prints creator", category: "home", platform: "etsy" as const },
+  { query: "site:etsy.com/shop digital download template creator", category: "tech", platform: "etsy" as const },
+  { query: "site:etsy.com/shop food drink recipe creator handmade", category: "food-drink", platform: "etsy" as const },
+  // Depop — fashion resale creators
+  { query: "site:depop.com fashion resale creator vintage style", category: "fashion", platform: "depop" as const },
+  { query: "site:depop.com streetwear creator resale vintage", category: "fashion", platform: "depop" as const },
+  { query: "site:depop.com beauty skincare resale creator", category: "beauty", platform: "depop" as const },
+  // Shopify — creator branded stores
+  { query: "site:myshopify.com fashion creator influencer merch store", category: "fashion", platform: "shopify" as const },
+  { query: "site:myshopify.com beauty skincare creator influencer brand", category: "beauty", platform: "shopify" as const },
+  { query: "site:myshopify.com fitness creator influencer brand store", category: "fitness", platform: "shopify" as const },
+  { query: "site:myshopify.com home decor creator influencer brand", category: "home", platform: "shopify" as const },
+  // Spring (Teespring) — creator merch
+  { query: "site:teespring.com/stores creator merch youtuber tiktok", category: "fashion", platform: "spring" as const },
+  { query: "site:teespring.com/stores gaming tech creator merch", category: "tech", platform: "spring" as const },
+  { query: "site:teespring.com/stores fitness creator merch", category: "fitness", platform: "spring" as const },
+  // Gumroad — digital product creators
+  { query: "site:gumroad.com digital products creator templates presets", category: "tech", platform: "gumroad" as const },
+  { query: "site:gumroad.com photography presets lightroom creator", category: "beauty", platform: "gumroad" as const },
+  { query: "site:gumroad.com ebook guide creator recipe food", category: "food-drink", platform: "gumroad" as const },
+  { query: "site:gumroad.com fitness workout plan creator digital", category: "fitness", platform: "gumroad" as const },
 ];
 
 // Path to track previously seen URLs so we don't re-process them
@@ -166,6 +201,67 @@ function extractHandle(url: string): string | null {
   return handle;
 }
 
+function extractEtsyHandle(url: string): string | null {
+  const match = url.match(/etsy\.com\/shop\/([a-zA-Z0-9_-]+)/);
+  if (!match) return null;
+  const handle = match[1].toLowerCase();
+  if (["sold", "listing", "search", "market"].includes(handle)) return null;
+  return handle;
+}
+
+function extractDepopHandle(url: string): string | null {
+  const match = url.match(/depop\.com\/([a-zA-Z0-9_.-]+)\/?$/);
+  if (!match) return null;
+  const handle = match[1].toLowerCase();
+  if (["explore", "category", "search", "login", "signup", "about", "blog", "products"].includes(handle)) return null;
+  return handle;
+}
+
+function extractShopifyHandle(url: string): string | null {
+  const match = url.match(/([a-zA-Z0-9-]+)\.myshopify\.com/);
+  if (!match) return null;
+  const handle = match[1].toLowerCase();
+  if (["myshopify", "admin", "accounts", "checkout"].includes(handle)) return null;
+  return handle;
+}
+
+function extractSpringHandle(url: string): string | null {
+  // teespring.com/stores/name or spring.com/name
+  const teeMatch = url.match(/teespring\.com\/stores\/([a-zA-Z0-9_-]+)/);
+  if (teeMatch) return teeMatch[1].toLowerCase();
+  const springMatch = url.match(/spring\.com\/([a-zA-Z0-9_-]+)/);
+  if (springMatch) {
+    const handle = springMatch[1].toLowerCase();
+    if (["shop", "stores", "about", "blog", "contact"].includes(handle)) return null;
+    return handle;
+  }
+  return null;
+}
+
+function extractGumroadHandle(url: string): string | null {
+  const match = url.match(/gumroad\.com\/([a-zA-Z0-9_-]+)/);
+  if (!match) return null;
+  const handle = match[1].toLowerCase();
+  if (["l", "p", "products", "discover", "about", "signup", "login", "blog"].includes(handle)) return null;
+  return handle;
+}
+
+function extractTikTokHandle(url: string): string | null {
+  const match = url.match(/tiktok\.com\/@([a-zA-Z0-9._-]+)/);
+  if (!match) return null;
+  const handle = match[1].toLowerCase();
+  if (["explore", "following", "live", "music", "shop", "video", "trending"].includes(handle)) return null;
+  return handle;
+}
+
+function extractYouTubeHandle(url: string): string | null {
+  const atMatch = url.match(/youtube\.com\/@([a-zA-Z0-9._-]+)/);
+  if (atMatch) return atMatch[1].toLowerCase();
+  const cMatch = url.match(/youtube\.com\/c\/([a-zA-Z0-9._-]+)/);
+  if (cMatch) return cMatch[1].toLowerCase();
+  return null;
+}
+
 // Patterns that indicate a generic/spam storefront with no real creator behind it
 const GENERIC_PATTERNS = [
   /^(cool|amazing|smart|future|unique|top|best|great|awesome)\s+\w+$/i,
@@ -242,19 +338,33 @@ async function searchBrave(
 // (avoids scraping Amazon, which can block requests)
 // ---------------------------------------------------------------------------
 
+type SupportedPlatform = "amazon" | "tiktok" | "youtube" | "etsy" | "depop" | "shopify" | "spring" | "gumroad";
+
 interface ShopData {
   name: string;
   shop_url: string;
-  platform: "amazon";
+  platform: SupportedPlatform;
   category: string;
   description: string;
   handle: string;
 }
 
+function buildShopUrl(platform: SupportedPlatform, handle: string): string {
+  if (platform === "tiktok") return `https://www.tiktok.com/@${handle}`;
+  if (platform === "youtube") return `https://www.youtube.com/@${handle}`;
+  if (platform === "etsy") return `https://www.etsy.com/shop/${handle}`;
+  if (platform === "depop") return `https://www.depop.com/${handle}`;
+  if (platform === "shopify") return `https://${handle}.myshopify.com`;
+  if (platform === "spring") return `https://www.teespring.com/stores/${handle}`;
+  if (platform === "gumroad") return `https://gumroad.com/${handle}`;
+  return `https://www.amazon.com/shop/${handle}`;
+}
+
 function extractShopFromSearchResult(
   result: SearchResult,
   handle: string,
-  fallbackCategory: string
+  fallbackCategory: string,
+  platform: SupportedPlatform = "amazon"
 ): ShopData {
   // Clean up the title from Brave results
   let name = result.title
@@ -284,8 +394,8 @@ function extractShopFromSearchResult(
 
   return {
     name,
-    shop_url: `https://www.amazon.com/shop/${handle}`,
-    platform: "amazon",
+    shop_url: buildShopUrl(platform, handle),
+    platform,
     category,
     description,
     handle,
@@ -335,8 +445,8 @@ async function main() {
     `Starting discovery (${queries.length} categories, ${maxPages} pages each)${DRY_RUN ? " [DRY RUN]" : ""}\n`
   );
 
-  for (const { query, category } of queries) {
-    console.log(`Searching: ${category}`);
+  for (const { query, category, platform } of queries) {
+    console.log(`Searching: ${platform}/${category}`);
 
     for (let page = 0; page < maxPages; page++) {
       const offset = page * 20;
@@ -346,15 +456,23 @@ async function main() {
       if (results.length === 0) break;
 
       for (const result of results) {
-        const handle = extractHandle(result.link);
+        let handle: string | null = null;
+        if (platform === "amazon") handle = extractHandle(result.link);
+        else if (platform === "tiktok") handle = extractTikTokHandle(result.link);
+        else if (platform === "youtube") handle = extractYouTubeHandle(result.link);
+        else if (platform === "etsy") handle = extractEtsyHandle(result.link);
+        else if (platform === "depop") handle = extractDepopHandle(result.link);
+        else if (platform === "shopify") handle = extractShopifyHandle(result.link);
+        else if (platform === "spring") handle = extractSpringHandle(result.link);
+        else if (platform === "gumroad") handle = extractGumroadHandle(result.link);
         if (!handle) continue;
 
-        const shopUrl = `https://www.amazon.com/shop/${handle}`;
+        const shopUrl = buildShopUrl(platform, handle);
         if (seenUrls.has(shopUrl)) continue;
 
         seenUrls.add(shopUrl);
 
-        const shop = extractShopFromSearchResult(result, handle, category);
+        const shop = extractShopFromSearchResult(result, handle, category, platform);
 
         if (!isQualityShop(shop.name)) {
           console.log(`  ✗ ${shop.name} (filtered — generic name)`);
@@ -420,7 +538,7 @@ async function main() {
       category: shop.category,
       description: shop.description,
       followers: null,
-      status: "pending",
+      status: "approved",
       submitted_by: null,
       clicks: 0,
       avg_rating: 0,

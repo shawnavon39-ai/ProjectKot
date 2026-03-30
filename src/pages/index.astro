@@ -17,6 +17,7 @@ export const prerender = false;
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ShopCard from '../components/ShopCard.astro';
 import AdUnit from '../components/AdUnit.astro';
+import EmailCapture from '../components/EmailCapture.astro';
 import SearchBar from '../components/SearchBar';
 import { env } from 'cloudflare:workers';
 import { getSupabase } from '../lib/supabase';
@@ -190,6 +191,9 @@ const platforms = Object.entries(platformDisplayNames).map(([key, name]) => ({
       </div>
     </section>
   )}
+
+  <!-- Email capture -->
+  <EmailCapture supabaseUrl={env.PUBLIC_SUPABASE_URL} supabaseAnonKey={env.PUBLIC_SUPABASE_ANON_KEY} />
 
   <!-- How It Works -->
   <section class="max-w-7xl mx-auto px-4 pb-16">

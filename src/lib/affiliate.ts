@@ -12,7 +12,7 @@
   the logic genuinely varies per platform and will change over time.
 */
 
-type Platform = 'tiktok' | 'instagram' | 'youtube' | 'pinterest' | 'amazon';
+type Platform = 'tiktok' | 'instagram' | 'youtube' | 'pinterest' | 'amazon' | 'etsy' | 'depop' | 'shopify' | 'spring' | 'gumroad';
 
 interface AffiliateConfig {
   tag?: string;
@@ -42,6 +42,12 @@ const configs: Record<Platform, AffiliateConfig> = {
   instagram: { rewrite: (url) => url },
   youtube: { rewrite: (url) => url },
   pinterest: { rewrite: (url) => url },
+  depop: { rewrite: (url) => url },
+  shopify: { rewrite: (url) => url },
+  spring: { rewrite: (url) => url },
+  gumroad: { rewrite: (url) => url },
+  // Etsy — add your Awin affiliate ID once approved: tag format is awinaffid=XXXXX&awinmid=6220
+  etsy: { rewrite: (url) => url },
 };
 
 export function getAffiliateUrl(platform: Platform, shopUrl: string): string {

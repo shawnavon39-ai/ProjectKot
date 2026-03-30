@@ -10,7 +10,7 @@ export interface Shop {
   created_at: string;
   name: string;
   slug: string;
-  platform: 'tiktok' | 'instagram' | 'youtube' | 'pinterest' | 'amazon';
+  platform: 'tiktok' | 'instagram' | 'youtube' | 'pinterest' | 'amazon' | 'etsy' | 'depop' | 'shopify' | 'spring' | 'gumroad';
   category: string;
   description: string | null;
   shop_url: string;
@@ -28,6 +28,11 @@ export const platformDisplayNames: Record<Shop['platform'], string> = {
   youtube: 'YouTube Shopping',
   pinterest: 'Pinterest Shopping',
   amazon: 'Amazon Influencer',
+  etsy: 'Etsy',
+  depop: 'Depop',
+  shopify: 'Shopify Store',
+  spring: 'Spring (Merch)',
+  gumroad: 'Gumroad',
 };
 
 export const platformColours: Record<Shop['platform'], string> = {
@@ -36,4 +41,9 @@ export const platformColours: Record<Shop['platform'], string> = {
   youtube: 'bg-red-100 text-red-800',
   pinterest: 'bg-rose-100 text-rose-800',
   amazon: 'bg-amber-100 text-amber-800',
+  etsy: 'bg-orange-100 text-orange-800',
+  depop: 'bg-green-100 text-green-800',
+  shopify: 'bg-emerald-100 text-emerald-800',
+  spring: 'bg-sky-100 text-sky-800',
+  gumroad: 'bg-fuchsia-100 text-fuchsia-800',
 };
