@@ -8,8 +8,7 @@ const blog = defineCollection({
     description: z.string(),
     pubDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
-    category: z.enum(['fashion', 'beauty', 'home', 'tech', 'lifestyle', 'guides']),
-    tags: z.array(z.string()).default([]),
+    category: z.enum(['fashion', 'beauty', 'home', 'tech', 'fitness', 'food-drink', 'amazon', 'lifestyle', 'guides']).optional(),
     image: z.string().optional(),
   }),
 });
