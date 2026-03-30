@@ -17,25 +17,17 @@
 export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { env } from 'cloudflare:workers';
 import { createClient } from '@supabase/supabase-js';
 import { platformDisplayNames } from '../lib/types';
 import type { Shop } from '../lib/types';
 
-let runtimeEnv: Record<string, any> = {};
-try {
-  runtimeEnv = (Astro.locals as any)?.runtime?.env ?? {};
-} catch (e) {
-  return new Response(`runtime.env access failed: ${e}`, { status: 500 });
-}
+const ADMIN_PASSWORD = (env as any).ADMIN_PASSWORD ?? import.meta.env.ADMIN_PASSWORD;
+const serviceRoleKey = (env as any).SUPABASE_SERVICE_ROLE_KEY ?? import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseUrl = (env as any).PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL;
 
-const ADMIN_PASSWORD = runtimeEnv.ADMIN_PASSWORD ?? import.meta.env.ADMIN_PASSWORD;
-const serviceRoleKey = runtimeEnv.SUPABASE_SERVICE_ROLE_KEY ?? import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
-const supabaseUrl = runtimeEnv.PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL ?? 'https://sbfxxxuvefjphijflxax.supabase.co';
-
-// Debug: surface what keys are visible (remove after fix)
 if (!ADMIN_PASSWORD || !serviceRoleKey) {
-  const keys = Object.keys(runtimeEnv);
-  return new Response(`Admin not configured. runtimeEnv keys: [${keys.join(', ')}] | ADMIN_PASSWORD: ${!!ADMIN_PASSWORD} | serviceRoleKey: ${!!serviceRoleKey}`, { status: 503 });
+  return new Response('Admin not configured', { status: 503 });
 }
 
 const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
