@@ -17,6 +17,7 @@ export const prerender = false;
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ReviewForm from '../../components/ReviewForm';
+import ShopCard from '../../components/ShopCard.astro';
 import { env } from 'cloudflare:workers';
 import { getSupabase } from '../../lib/supabase';
 import { platformDisplayNames, platformColours } from '../../lib/types';
@@ -49,6 +50,19 @@ const { data: reviewData } = await supabase
   .order('created_at', { ascending: false });
 
 const reviews = reviewData ?? [];
+
+// Related: same platform, same category preferred, exclude current shop
+const { data: relatedData } = await supabase
+  .from('shops')
+  .select('*')
+  .eq('status', 'approved')
+  .eq('platform', shop.platform)
+  .neq('id', shop.id)
+  .order('avg_rating', { ascending: false })
+  .limit(4);
+
+const related = (relatedData ?? []) as Shop[];
+
 const avgRating = reviews.length > 0
   ? (reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length)
   : 0;
@@ -181,5 +195,18 @@ const breadcrumbLd = {
         <ReviewForm shopId={shop.id} supabaseUrl={env.PUBLIC_SUPABASE_URL} supabaseAnonKey={env.PUBLIC_SUPABASE_ANON_KEY} client:only="react" />
       </div>
     </div>
+
+    <!-- Related shops -->
+    {related.length > 0 && (
+      <div class="mt-12">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-bold text-slate-900">More {displayName} shops</h2>
+          <a href={`/shops?platform=${shop.platform}`} class="text-sm text-violet-600 hover:text-violet-700 font-medium transition">View all →</a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {related.map(s => <ShopCard shop={s} />)}
+        </div>
+      </div>
+    )}
   </section>
 </BaseLayout>
