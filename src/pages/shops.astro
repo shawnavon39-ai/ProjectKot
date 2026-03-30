@@ -19,6 +19,7 @@ const supabase = getSupabase(env);
 
 const url = new URL(Astro.request.url);
 const activePlatform = url.searchParams.get('platform');
+const activeSort = url.searchParams.get('sort') ?? 'newest';
 
 let query = supabase
   .from('shops')
@@ -29,7 +30,15 @@ if (activePlatform) {
   query = query.eq('platform', activePlatform);
 }
 
-const { data } = await query.order('created_at', { ascending: false });
+if (activeSort === 'rating') {
+  query = query.order('avg_rating', { ascending: false });
+} else if (activeSort === 'popular') {
+  query = query.order('clicks', { ascending: false });
+} else {
+  query = query.order('created_at', { ascending: false });
+}
+
+const { data } = await query;
 
 const shops = (data ?? []) as Shop[];
 
@@ -74,6 +83,29 @@ const categories = [
     </div>
 
     <AdUnit className="mb-8" />
+
+    <!-- Sort controls -->
+    <div class="flex items-center justify-between mb-6">
+      <p class="text-sm text-slate-500">{shops.length} shop{shops.length !== 1 ? 's' : ''}</p>
+      <div class="flex gap-2">
+        {[
+          { value: 'newest', label: 'Newest' },
+          { value: 'rating', label: 'Top Rated' },
+          { value: 'popular', label: 'Most Clicked' },
+        ].map(({ value, label }) => {
+          const params = new URLSearchParams(url.searchParams);
+          params.set('sort', value);
+          return (
+            <a
+              href={`/shops?${params.toString()}`}
+              class={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${activeSort === value ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+            >
+              {label}
+            </a>
+          );
+        })}
+      </div>
+    </div>
 
     {shops.length > 0 ? (
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
