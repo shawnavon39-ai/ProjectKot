@@ -26,6 +26,24 @@ import type { Shop } from '../lib/types';
 
 const supabase = getSupabase(env);
 
+// Stats for social proof bar
+const { count: totalShops } = await supabase
+  .from('shops')
+  .select('*', { count: 'exact', head: true })
+  .eq('status', 'approved');
+
+const { count: totalReviews } = await supabase
+  .from('reviews')
+  .select('*', { count: 'exact', head: true })
+  .eq('status', 'approved');
+
+const { data: platformData } = await supabase
+  .from('shops')
+  .select('platform')
+  .eq('status', 'approved');
+
+const totalPlatforms = new Set((platformData ?? []).map((s: any) => s.platform)).size;
+
 const { data: featuredShops } = await supabase
   .from('shops')
   .select('*')
@@ -131,6 +149,25 @@ const platforms = Object.entries(platformDisplayNames).map(([key, name]) => ({
       <a href="/category/home" class="px-3.5 py-1.5 rounded-full text-sm font-semibold bg-slate-100 text-slate-700 hover:bg-violet-100 hover:text-violet-700 transition shadow-sm">🏠 Home</a>
       <a href="/category/fitness" class="px-3.5 py-1.5 rounded-full text-sm font-semibold bg-slate-100 text-slate-700 hover:bg-violet-100 hover:text-violet-700 transition shadow-sm">💪 Fitness</a>
       <a href="/category/food-drink" class="px-3.5 py-1.5 rounded-full text-sm font-semibold bg-slate-100 text-slate-700 hover:bg-violet-100 hover:text-violet-700 transition shadow-sm">🍕 Food & Drink</a>
+      <a href="/category/other" class="px-3.5 py-1.5 rounded-full text-sm font-semibold bg-slate-100 text-slate-700 hover:bg-violet-100 hover:text-violet-700 transition shadow-sm">✨ Other</a>
+    </div>
+  </section>
+
+  <!-- Stats bar -->
+  <section class="max-w-7xl mx-auto px-4 pb-10">
+    <div class="flex flex-wrap justify-center gap-8 sm:gap-16 py-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
+      <div class="text-center">
+        <p class="text-3xl font-extrabold text-slate-900">{(totalShops ?? 0).toLocaleString()}</p>
+        <p class="text-sm text-slate-500 mt-0.5">Creator shops</p>
+      </div>
+      <div class="text-center">
+        <p class="text-3xl font-extrabold text-slate-900">{totalPlatforms}</p>
+        <p class="text-sm text-slate-500 mt-0.5">Platforms</p>
+      </div>
+      <div class="text-center">
+        <p class="text-3xl font-extrabold text-slate-900">{(totalReviews ?? 0).toLocaleString()}</p>
+        <p class="text-sm text-slate-500 mt-0.5">Reviews</p>
+      </div>
     </div>
   </section>
 
