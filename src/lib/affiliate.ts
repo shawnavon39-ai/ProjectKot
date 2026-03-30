@@ -46,8 +46,16 @@ const configs: Record<Platform, AffiliateConfig> = {
   shopify: { rewrite: (url) => url },
   spring: { rewrite: (url) => url },
   gumroad: { rewrite: (url) => url },
-  // Etsy — add your Awin affiliate ID once approved: tag format is awinaffid=XXXXX&awinmid=6220
-  etsy: { rewrite: (url) => url },
+  // Etsy via Awin — publisher ID 2834440
+  // awinmid=6220 is Etsy UK. Verify the correct merchant ID in your Awin Advertiser Directory
+  // once your Etsy programme application is approved.
+  etsy: {
+    tag: '6220',
+    rewrite: (url, awinmid) => {
+      const encoded = encodeURIComponent(url);
+      return `https://www.awin1.com/cread.php?awinaffid=2834440&awinmid=${awinmid}&p=${encoded}`;
+    },
+  },
 };
 
 export function getAffiliateUrl(platform: Platform, shopUrl: string): string {
