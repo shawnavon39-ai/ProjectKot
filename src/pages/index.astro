@@ -17,7 +17,7 @@ export const prerender = false;
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ShopCard from '../components/ShopCard.astro';
 import AdUnit from '../components/AdUnit.astro';
-import EmailCapture from '../components/EmailCapture.astro';
+import EmailSignup from '../components/EmailSignup';
 import SearchBar from '../components/SearchBar';
 import { env } from 'cloudflare:workers';
 import { getSupabase } from '../lib/supabase';
@@ -230,7 +230,15 @@ const platforms = Object.entries(platformDisplayNames).map(([key, name]) => ({
   )}
 
   <!-- Email capture -->
-  <EmailCapture supabaseUrl={env.PUBLIC_SUPABASE_URL} supabaseAnonKey={env.PUBLIC_SUPABASE_ANON_KEY} />
+  <section class="max-w-7xl mx-auto px-4 pb-16">
+    <div class="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl p-8 sm:p-10 text-center text-white">
+      <h2 class="text-2xl font-bold mb-2">New shops added every week</h2>
+      <p class="text-violet-200 mb-6 text-sm">Get the best new creator shops delivered to your inbox. No spam, unsubscribe anytime.</p>
+      <div class="max-w-md mx-auto [&_input]:text-slate-900 [&_button]:bg-white [&_button]:text-violet-700 [&_button]:hover:bg-violet-50">
+        <EmailSignup client:only="react" />
+      </div>
+    </div>
+  </section>
 
   <!-- How It Works -->
   <section class="max-w-7xl mx-auto px-4 pb-16">
