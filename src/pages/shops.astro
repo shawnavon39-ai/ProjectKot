@@ -10,6 +10,7 @@ export const prerender = false;
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ShopCard from '../components/ShopCard.astro';
 import AdUnit from '../components/AdUnit.astro';
+import EmailSignup from '../components/EmailSignup';
 import { env } from 'cloudflare:workers';
 import { getSupabase } from '../lib/supabase';
 import { platformDisplayNames } from '../lib/types';
@@ -118,5 +119,9 @@ const categories = [
     )}
 
     <AdUnit className="mt-8" />
+
+    <div class="mt-12 max-w-xl">
+      <EmailSignup variant="banner" client:only="react" />
+    </div>
   </section>
 </BaseLayout>

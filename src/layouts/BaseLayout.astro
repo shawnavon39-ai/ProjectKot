@@ -30,6 +30,7 @@ const siteName = "Pick Your Shop";
 
 import '../styles/global.css';
 import NavBar from '../components/NavBar';
+import EmailSignup from '../components/EmailSignup';
 
 /*
   Pass Supabase config as props to client:only React components.
@@ -104,6 +105,10 @@ const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
     <footer class="border-t border-slate-200 mt-16 bg-white">
       <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="max-w-sm mb-8">
+          <p class="text-sm font-medium text-slate-700 mb-2">Get notified of new shops</p>
+          <EmailSignup client:only="react" />
+        </div>
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500">
           <span>&copy; {new Date().getFullYear()} Pick Your Shop</span>
           <div class="flex items-center gap-4">
