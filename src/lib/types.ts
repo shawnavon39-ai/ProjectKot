@@ -20,6 +20,7 @@ export interface Shop {
   clicks: number;
   avg_rating: number;
   review_count: number;
+  verified: boolean;
 }
 
 export const platformDisplayNames: Record<Shop['platform'], string> = {
