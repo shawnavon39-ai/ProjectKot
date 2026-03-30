@@ -52,17 +52,19 @@ const maxPages = Math.min(
   10
 );
 
-// Search queries — each targets a different category
+// Search queries — creator-focused to surface real influencers, not generic storefronts
 const SEARCH_QUERIES = [
-  { query: "site:amazon.com/shop fashion style outfit", category: "fashion" },
-  { query: "site:amazon.com/shop beauty makeup skincare", category: "beauty" },
-  { query: "site:amazon.com/shop tech gadgets electronics", category: "tech" },
-  { query: "site:amazon.com/shop home decor kitchen", category: "home" },
-  { query: "site:amazon.com/shop fitness gym workout", category: "fitness" },
-  {
-    query: "site:amazon.com/shop food cooking kitchen essentials",
-    category: "food-drink",
-  },
+  // Creator-linked category queries
+  { query: "site:amazon.com/shop fashion influencer tiktok outfit haul", category: "fashion" },
+  { query: "site:amazon.com/shop beauty influencer skincare routine instagram", category: "beauty" },
+  { query: "site:amazon.com/shop tech youtuber setup desk essentials", category: "tech" },
+  { query: "site:amazon.com/shop home decor blogger interior instagram", category: "home" },
+  { query: "site:amazon.com/shop fitness coach workout routine youtube", category: "fitness" },
+  { query: "site:amazon.com/shop food blogger recipe cooking youtube", category: "food-drink" },
+  // Trending / viral discovery
+  { query: "site:amazon.com/shop tiktok viral trending tiktokmademebuyit", category: "fashion" },
+  { query: "site:amazon.com/shop amazon finds viral tiktok 2025", category: "beauty" },
+  { query: "site:amazon.com/shop my storefront followers picks", category: "home" },
 ];
 
 // Path to track previously seen URLs so we don't re-process them
@@ -162,6 +164,29 @@ function extractHandle(url: string): string | null {
   // Filter out generic Amazon pages
   if (["shop", "b", "s", "dp", "gp"].includes(handle)) return null;
   return handle;
+}
+
+// Patterns that indicate a generic/spam storefront with no real creator behind it
+const GENERIC_PATTERNS = [
+  /^(cool|amazing|smart|future|unique|top|best|great|awesome)\s+\w+$/i,
+  /^(gadgets?|products?|deals?|finds?|picks?|favorites?|items?|stuff)$/i,
+  /^amazon\s+(customer|favorites|finds|store)$/i,
+  /^(home|kitchen|beauty|fashion|fitness|tech)\s+(decor|gadgets?|products?|finds?|ideas?)$/i,
+  /^my\s+(amazon\s+)?(storefront|store|shop|picks|favorites|finds|recommendations?)$/i,
+  /^(shop|store)\s+(today|now|here|online)$/i,
+];
+
+/**
+ * Returns false for generic keyword storefronts that have no real creator behind them.
+ * We only want shops from actual influencers/creators with a real audience.
+ */
+function isQualityShop(name: string): boolean {
+  const trimmed = name.trim();
+  // Too short to be meaningful
+  if (trimmed.length < 4) return false;
+  // Matches a known generic pattern
+  if (GENERIC_PATTERNS.some((p) => p.test(trimmed))) return false;
+  return true;
 }
 
 // ---------------------------------------------------------------------------
@@ -330,6 +355,12 @@ async function main() {
         seenUrls.add(shopUrl);
 
         const shop = extractShopFromSearchResult(result, handle, category);
+
+        if (!isQualityShop(shop.name)) {
+          console.log(`  ✗ ${shop.name} (filtered — generic name)`);
+          continue;
+        }
+
         discovered.push(shop);
         console.log(`  ✓ ${shop.name} (${shop.category})`);
       }
