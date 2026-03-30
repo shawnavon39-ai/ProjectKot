@@ -64,11 +64,15 @@ if (Astro.request.method === 'POST') {
 
   if (action === 'approve' && isAuthenticated) {
     const shopId = formData.get('shop_id') as string;
+    // Auto-verify if the shop has a followers count filled in
+    const { data: shopToApprove } = await supabaseAdmin
+      .from('shops').select('followers').eq('id', shopId).single();
+    const autoVerify = !!(shopToApprove?.followers?.trim());
     const { error } = await supabaseAdmin
       .from('shops')
-      .update({ status: 'approved' })
+      .update({ status: 'approved', verified: autoVerify })
       .eq('id', shopId);
-    message = error ? `Error: ${error.message}` : 'Shop approved!';
+    message = error ? `Error: ${error.message}` : `Shop approved!${autoVerify ? ' (auto-verified — followers present)' : ''}`;
     messageType = error ? 'error' : 'success';
   }
 
@@ -79,6 +83,17 @@ if (Astro.request.method === 'POST') {
       .update({ status: 'rejected' })
       .eq('id', shopId);
     message = error ? `Error: ${error.message}` : 'Shop rejected.';
+    messageType = error ? 'error' : 'success';
+  }
+
+  if (action === 'toggle_verified' && isAuthenticated) {
+    const shopId = formData.get('shop_id') as string;
+    const currentVerified = formData.get('current_verified') === 'true';
+    const { error } = await supabaseAdmin
+      .from('shops')
+      .update({ verified: !currentVerified })
+      .eq('id', shopId);
+    message = error ? `Error: ${error.message}` : `Shop ${!currentVerified ? 'verified' : 'unverified'}.`;
     messageType = error ? 'error' : 'success';
   }
 
@@ -130,6 +145,15 @@ if (isAuthenticated) {
 
   approvedCount = approved ?? 0;
   pendingCount = pendingTotal ?? 0;
+
+  // Fetch approved shops for verified toggle
+  const { data: approvedShopsData } = await supabaseAdmin
+    .from('shops')
+    .select('id, name, slug, verified, followers, platform')
+    .eq('status', 'approved')
+    .order('name', { ascending: true });
+
+  const approvedShops = (approvedShopsData ?? []) as Pick<Shop, 'id' | 'name' | 'slug' | 'verified' | 'followers' | 'platform'>[];
 
   // Fetch pending reviews with shop name
   const { data: pendingReviewData } = await supabaseAdmin
@@ -279,6 +303,50 @@ if (isAuthenticated) {
             </table>
           </div>
         )}
+
+        <!-- Verified toggle -->
+        <div class="mt-12">
+          <h2 class="text-xl font-bold mb-1">Verified Shops</h2>
+          <p class="text-sm text-slate-500 mb-4">Shops auto-verify on approval if a followers count is present. Toggle manually here.</p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500">
+                  <th class="pb-3 pr-3">Shop</th>
+                  <th class="pb-3 pr-3">Followers</th>
+                  <th class="pb-3 pr-3">Status</th>
+                  <th class="pb-3 text-right">Toggle</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                {approvedShops.map(shop => (
+                  <tr class="hover:bg-gray-50">
+                    <td class="py-2.5 pr-3">
+                      <a href={`/shops/${shop.slug}`} target="_blank" class="font-medium text-slate-900 hover:text-violet-600 transition">{shop.name}</a>
+                    </td>
+                    <td class="py-2.5 pr-3 text-slate-500 text-xs">{shop.followers ?? '—'}</td>
+                    <td class="py-2.5 pr-3">
+                      {shop.verified
+                        ? <span class="inline-flex items-center gap-1 text-xs font-medium text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">✓ Verified</span>
+                        : <span class="text-xs text-slate-400">Unverified</span>
+                      }
+                    </td>
+                    <td class="py-2.5 text-right">
+                      <form method="POST" class="inline">
+                        <input type="hidden" name="action" value="toggle_verified" />
+                        <input type="hidden" name="shop_id" value={shop.id} />
+                        <input type="hidden" name="current_verified" value={String(shop.verified)} />
+                        <button type="submit" class={`px-3 py-1 text-xs rounded-lg font-medium transition ${shop.verified ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : 'bg-violet-600 text-white hover:bg-violet-700'}`}>
+                          {shop.verified ? 'Unverify' : 'Verify'}
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         <!-- Review moderation -->
         <div class="mt-12">
