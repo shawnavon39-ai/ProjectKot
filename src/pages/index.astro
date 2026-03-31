@@ -156,18 +156,18 @@ const platforms = Object.entries(platformDisplayNames).map(([key, name]) => ({
   <!-- Stats bar -->
   <section class="max-w-7xl mx-auto px-4 pb-10">
     <div class="flex flex-wrap justify-center gap-8 sm:gap-16 py-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
-      <div class="text-center">
-        <p class="text-3xl font-extrabold text-slate-900">{(totalShops ?? 0).toLocaleString()}</p>
-        <p class="text-sm text-slate-500 mt-0.5">Creator shops</p>
-      </div>
-      <div class="text-center">
-        <p class="text-3xl font-extrabold text-slate-900">{totalPlatforms}</p>
-        <p class="text-sm text-slate-500 mt-0.5">Platforms</p>
-      </div>
-      <div class="text-center">
-        <p class="text-3xl font-extrabold text-slate-900">{(totalReviews ?? 0).toLocaleString()}</p>
-        <p class="text-sm text-slate-500 mt-0.5">Reviews</p>
-      </div>
+      <a href="/shops" class="text-center group">
+        <p class="text-3xl font-extrabold text-slate-900 group-hover:text-violet-600 transition">{(totalShops ?? 0).toLocaleString()}</p>
+        <p class="text-sm text-slate-500 mt-0.5 group-hover:text-violet-500 transition">Creator shops</p>
+      </a>
+      <a href="/shops" class="text-center group">
+        <p class="text-3xl font-extrabold text-slate-900 group-hover:text-violet-600 transition">{totalPlatforms}</p>
+        <p class="text-sm text-slate-500 mt-0.5 group-hover:text-violet-500 transition">Platforms</p>
+      </a>
+      <a href="/shops?sort=rating" class="text-center group">
+        <p class="text-3xl font-extrabold text-slate-900 group-hover:text-violet-600 transition">{(totalReviews ?? 0).toLocaleString()}</p>
+        <p class="text-sm text-slate-500 mt-0.5 group-hover:text-violet-500 transition">Reviews</p>
+      </a>
     </div>
   </section>
 
