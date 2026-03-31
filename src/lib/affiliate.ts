@@ -46,16 +46,8 @@ const configs: Record<Platform, AffiliateConfig> = {
   shopify: { rewrite: (url) => url },
   spring: { rewrite: (url) => url },
   gumroad: { rewrite: (url) => url },
-  // Etsy via Awin — publisher ID 2834440
-  // awinmid=6220 is Etsy UK. Verify the correct merchant ID in your Awin Advertiser Directory
-  // once your Etsy programme application is approved.
-  etsy: {
-    tag: '6220',
-    rewrite: (url, awinmid) => {
-      const encoded = encodeURIComponent(url);
-      return `https://www.awin1.com/cread.php?awinaffid=2834440&awinmid=${awinmid}&p=${encoded}`;
-    },
-  },
+  // Etsy — Awin account closed (2026-03-31), pass through until reapplied
+  etsy: { rewrite: (url) => url },
 };
 
 export function getAffiliateUrl(platform: Platform, shopUrl: string): string {
