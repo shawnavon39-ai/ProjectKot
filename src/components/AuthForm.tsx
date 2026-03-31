@@ -16,7 +16,7 @@ interface Props {
   supabaseAnonKey: string;
 }
 
-type Mode = 'signin' | 'signup';
+type Mode = 'signin' | 'signup' | 'reset';
 
 export default function AuthForm({ supabaseUrl, supabaseAnonKey }: Props) {
   const supabaseRef = useRef<SupabaseClient | null>(null);
@@ -29,11 +29,22 @@ export default function AuthForm({ supabaseUrl, supabaseAnonKey }: Props) {
   const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    if (mode === 'reset') {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/login`,
+      });
+      setLoading(false);
+      if (error) { setError(error.message); return; }
+      setResetSent(true);
+      return;
+    }
 
     if (mode === 'signup') {
       const { error } = await supabase.auth.signUp({
@@ -71,8 +82,14 @@ export default function AuthForm({ supabaseUrl, supabaseAnonKey }: Props) {
   return (
     <div className="max-w-sm mx-auto">
       <h1 className="text-2xl font-bold mb-6 text-center">
-        {mode === 'signin' ? 'Sign In' : 'Create Account'}
+        {mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Reset Password'}
       </h1>
+
+      {resetSent && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-700 mb-4">
+          Check your email for a reset link.
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {mode === 'signup' && (
@@ -107,21 +124,23 @@ export default function AuthForm({ supabaseUrl, supabaseAnonKey }: Props) {
           />
         </div>
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-            Password
-          </label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            placeholder="Min 6 characters"
-            minLength={6}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        </div>
+        {mode !== 'reset' && (
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="Min 6 characters"
+              minLength={6}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+        )}
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
@@ -134,37 +153,34 @@ export default function AuthForm({ supabaseUrl, supabaseAnonKey }: Props) {
           disabled={loading}
           className="w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50"
         >
-          {loading
-            ? 'Loading...'
-            : mode === 'signin'
-              ? 'Sign In'
-              : 'Create Account'}
+          {loading ? 'Loading...' : mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Send reset link'}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-gray-600">
-        {mode === 'signin' ? (
+      <div className="mt-6 text-center text-sm text-gray-600 space-y-2">
+        {mode === 'signin' && (
           <>
-            Don't have an account?{' '}
-            <button
-              onClick={() => { setMode('signup'); setError(''); }}
-              className="text-blue-600 hover:underline font-medium"
-            >
-              Sign up
-            </button>
-          </>
-        ) : (
-          <>
-            Already have an account?{' '}
-            <button
-              onClick={() => { setMode('signin'); setError(''); }}
-              className="text-blue-600 hover:underline font-medium"
-            >
-              Sign in
-            </button>
+            <p>
+              Don't have an account?{' '}
+              <button onClick={() => { setMode('signup'); setError(''); setResetSent(false); }} className="text-blue-600 hover:underline font-medium">Sign up</button>
+            </p>
+            <p>
+              <button onClick={() => { setMode('reset'); setError(''); setResetSent(false); }} className="text-gray-500 hover:underline text-xs">Forgot password?</button>
+            </p>
           </>
         )}
-      </p>
+        {mode === 'signup' && (
+          <p>
+            Already have an account?{' '}
+            <button onClick={() => { setMode('signin'); setError(''); setResetSent(false); }} className="text-blue-600 hover:underline font-medium">Sign in</button>
+          </p>
+        )}
+        {mode === 'reset' && (
+          <p>
+            <button onClick={() => { setMode('signin'); setError(''); setResetSent(false); }} className="text-blue-600 hover:underline font-medium">Back to sign in</button>
+          </p>
+        )}
+      </div>
     </div>
   );
 }
