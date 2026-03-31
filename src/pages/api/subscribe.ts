@@ -1,8 +1,9 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
+import { env } from 'cloudflare:workers';
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request }) => {
   let email: string;
 
   try {
@@ -16,8 +17,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return new Response(JSON.stringify({ error: 'Invalid email address' }), { status: 400 });
   }
 
-  const runtime = (locals as any).runtime?.env ?? {};
-  const apiKey = runtime.BUTTONDOWN_API_KEY ?? import.meta.env.BUTTONDOWN_API_KEY;
+  const e = env as any;
+  const apiKey = e.BUTTONDOWN_API_KEY ?? import.meta.env.BUTTONDOWN_API_KEY;
 
   if (!apiKey) {
     return new Response(JSON.stringify({ error: 'Service unavailable' }), { status: 503 });

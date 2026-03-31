@@ -2,27 +2,33 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
+import { env } from 'cloudflare:workers';
 
 const ADMIN_USER_IDS = [
   'd61a80e6-eb10-46d2-b9ff-8da51b93b98a',
   '5b572ba1-910e-429e-818d-f1d6460eb54e',
 ];
 
-function getAdminClient(locals: App.Locals) {
-  const runtime = (locals as any).runtime?.env ?? {};
-  const supabaseUrl = runtime.PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = runtime.SUPABASE_SERVICE_ROLE_KEY ?? import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+function getEnv() {
+  const e = env as any;
+  return {
+    supabaseUrl: e.PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL,
+    serviceRoleKey: e.SUPABASE_SERVICE_ROLE_KEY ?? import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
+    anonKey: e.PUBLIC_SUPABASE_ANON_KEY ?? import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+  };
+}
+
+function getAdminClient() {
+  const { supabaseUrl, serviceRoleKey } = getEnv();
   if (!serviceRoleKey) throw new Error('SUPABASE_SERVICE_ROLE_KEY not configured');
   return createClient(supabaseUrl, serviceRoleKey);
 }
 
-async function verifyAdmin(request: Request, locals: App.Locals): Promise<{ ok: boolean; reason: string }> {
+async function verifyAdmin(request: Request): Promise<{ ok: boolean; reason: string }> {
   const token = request.headers.get('Authorization')?.replace('Bearer ', '');
   if (!token) return { ok: false, reason: 'no_token' };
   try {
-    const runtime = (locals as any).runtime?.env ?? {};
-    const supabaseUrl = runtime.PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL;
-    const anonKey = runtime.PUBLIC_SUPABASE_ANON_KEY ?? import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+    const { supabaseUrl, anonKey } = getEnv();
     if (!supabaseUrl) return { ok: false, reason: 'no_supabase_url' };
     const res = await fetch(`${supabaseUrl}/auth/v1/user`, {
       headers: {
@@ -43,12 +49,12 @@ async function verifyAdmin(request: Request, locals: App.Locals): Promise<{ ok: 
 const unauthorized = (reason = 'Unauthorized') => new Response(JSON.stringify({ error: 'Unauthorized', reason }), { status: 401 });
 const serverError = (msg: string) => new Response(JSON.stringify({ error: msg }), { status: 500 });
 
-export const GET: APIRoute = async ({ request, locals }) => {
+export const GET: APIRoute = async ({ request }) => {
   try {
-    const auth = await verifyAdmin(request, locals);
+    const auth = await verifyAdmin(request);
     if (!auth.ok) return unauthorized(auth.reason);
 
-    const supabase = getAdminClient(locals);
+    const supabase = getAdminClient();
 
     const [
       { data: pendingShops },
@@ -79,12 +85,12 @@ export const GET: APIRoute = async ({ request, locals }) => {
   }
 };
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request }) => {
   try {
-    const auth = await verifyAdmin(request, locals);
+    const auth = await verifyAdmin(request);
     if (!auth.ok) return unauthorized(auth.reason);
 
-    const supabase = getAdminClient(locals);
+    const supabase = getAdminClient();
     const body = await request.json();
     const { action } = body;
 
