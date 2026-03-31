@@ -6,7 +6,7 @@ interface Props {
   supabaseAnonKey: string;
 }
 
-type Tab = 'shops' | 'reviews' | 'verified' | 'products';
+type Tab = 'shops' | 'reviews' | 'verified' | 'products' | 'deals';
 
 export default function AdminPanel({ supabaseUrl, supabaseAnonKey }: Props) {
   const supabaseRef = useRef<SupabaseClient | null>(null);
@@ -99,6 +99,7 @@ export default function AdminPanel({ supabaseUrl, supabaseAnonKey }: Props) {
   const tabs: { id: Tab; label: string; count?: number }[] = [
     { id: 'shops', label: 'Pending Shops', count: data.pendingCount },
     { id: 'reviews', label: 'Pending Reviews', count: data.pendingReviews.length },
+    { id: 'deals', label: 'Deal Submissions', count: data.dealSubmissions?.length ?? 0 },
     { id: 'verified', label: 'Verified', count: data.approvedCount },
     { id: 'products', label: 'Products', count: data.products.length },
   ];
@@ -183,6 +184,41 @@ export default function AdminPanel({ supabaseUrl, supabaseAnonKey }: Props) {
                   <div className="flex gap-2">
                     <button onClick={() => action({ action: 'approve_review', reviewId: review.id })} className="px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg font-medium hover:bg-green-700 transition">Approve</button>
                     <button onClick={() => action({ action: 'reject_review', reviewId: review.id })} className="px-3 py-1.5 bg-red-600 text-white text-xs rounded-lg font-medium hover:bg-red-700 transition">Reject</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Deal Submissions */}
+      {activeTab === 'deals' && (
+        <div>
+          {(!data.dealSubmissions || data.dealSubmissions.length === 0) ? (
+            <p className="text-slate-500 text-sm py-8 text-center">No deal submissions yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {data.dealSubmissions.map((sub: any) => (
+                <div key={sub.id} className="bg-white rounded-xl border border-slate-200 p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-grow min-w-0">
+                      <p className="font-semibold text-slate-900 text-sm">{sub.product_name}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">from <span className="font-medium">{sub.shop_name}</span></p>
+                      <a href={sub.product_url} target="_blank" rel="noopener noreferrer" className="text-xs text-violet-600 hover:underline truncate block mt-1">{sub.product_url}</a>
+                      <div className="flex gap-3 mt-1 text-xs text-slate-500">
+                        {sub.price && <span>£{sub.price}</span>}
+                        {sub.original_price && <span className="line-through">£{sub.original_price}</span>}
+                        {sub.submitter_email && <span>· {sub.submitter_email}</span>}
+                      </div>
+                      {sub.notes && <p className="text-xs text-slate-400 mt-1 italic">"{sub.notes}"</p>}
+                    </div>
+                    <button
+                      onClick={() => action({ action: 'dismiss_deal_submission', submissionId: sub.id })}
+                      className="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs rounded-lg font-medium hover:bg-red-100 hover:text-red-700 transition flex-shrink-0"
+                    >
+                      Dismiss
+                    </button>
                   </div>
                 </div>
               ))}

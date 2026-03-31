@@ -1,0 +1,81 @@
+---
+export const prerender = false;
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const submitted = Astro.url.searchParams.get('submitted') === '1';
+---
+
+<BaseLayout
+  title="Submit a Deal"
+  description="Found a great deal on a creator shop? Submit it to Pick Your Shop and help other shoppers save."
+>
+  <section class="max-w-2xl mx-auto px-4 py-12">
+    <nav class="text-sm text-slate-500 mb-6">
+      <a href="/" class="hover:text-slate-900 transition">Home</a>
+      <span class="mx-2">›</span>
+      <span class="text-slate-900">Submit a Deal</span>
+    </nav>
+
+    <h1 class="text-3xl font-bold text-slate-900 mb-2">Submit a Deal</h1>
+    <p class="text-slate-600 mb-8">Spotted a sale on a creator shop? Share it and help other shoppers save. We review all submissions before they go live.</p>
+
+    {submitted ? (
+      <div class="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
+        <p class="text-2xl mb-2">🎉</p>
+        <p class="font-semibold text-green-800 mb-1">Deal submitted — thanks!</p>
+        <p class="text-sm text-green-700">We'll review it and add it to the deals page shortly.</p>
+        <a href="/deals" class="inline-block mt-4 px-4 py-2 bg-violet-600 text-white rounded-lg text-sm font-medium hover:bg-violet-700 transition">Browse current deals →</a>
+      </div>
+    ) : (
+      <form method="POST" action="/api/submit-deal" class="space-y-5 bg-white rounded-xl border border-slate-200 p-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Shop / Creator name <span class="text-red-500">*</span></label>
+            <input name="shop_name" type="text" required placeholder="e.g. Mrs Hinch Home" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Product name <span class="text-red-500">*</span></label>
+            <input name="product_name" type="text" required placeholder="e.g. Zoflora Multipack 6x500ml" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Product URL <span class="text-red-500">*</span></label>
+          <input name="product_url" type="url" required placeholder="https://..." class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-5">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Sale price (£)</label>
+            <input name="price" type="number" step="0.01" min="0" placeholder="19.99" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Original price (£)</label>
+            <input name="original_price" type="number" step="0.01" min="0" placeholder="34.99" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Product image URL <span class="text-slate-400 font-normal">(optional)</span></label>
+          <input name="image_url" type="url" placeholder="https://..." class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Any notes? <span class="text-slate-400 font-normal">(optional)</span></label>
+          <textarea name="notes" rows="2" placeholder="e.g. ends Sunday, use code SAVE20..." class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 resize-none"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Your email <span class="text-slate-400 font-normal">(optional — we'll let you know when it goes live)</span></label>
+          <input name="submitter_email" type="email" placeholder="you@example.com" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-violet-600 text-white rounded-lg font-semibold hover:bg-violet-700 transition">
+          Submit Deal
+        </button>
+
+        <p class="text-xs text-slate-400 text-center">All submissions are reviewed before going live. We check every link.</p>
+      </form>
+    )}
+  </section>
+</BaseLayout>

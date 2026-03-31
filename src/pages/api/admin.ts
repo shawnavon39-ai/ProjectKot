@@ -64,6 +64,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
       { count: approvedCount },
       { count: pendingCount },
       { data: products },
+      { data: dealSubmissions },
     ] = await Promise.all([
       supabase.from('shops').select('*').eq('status', 'pending').order('created_at', { ascending: true }),
       supabase.from('reviews').select('*, shops(name)').eq('status', 'pending').order('created_at', { ascending: true }),
@@ -71,6 +72,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
       supabase.from('shops').select('*', { count: 'exact', head: true }).eq('status', 'approved'),
       supabase.from('shops').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('products').select('*, shop:shops(name)').order('created_at', { ascending: false }),
+      supabase.from('deal_submissions').select('*').eq('status', 'pending').order('created_at', { ascending: true }),
     ]);
 
     return new Response(JSON.stringify({
@@ -78,6 +80,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
       pendingReviews: pendingReviews ?? [],
       approvedShops: approvedShops ?? [],
       products: products ?? [],
+      dealSubmissions: dealSubmissions ?? [],
       approvedCount: approvedCount ?? 0,
       pendingCount: pendingCount ?? 0,
     }), { status: 200 });
@@ -132,6 +135,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
         product_url: body.productUrl,
         on_sale: body.onSale ?? false,
       });
+      return new Response(JSON.stringify({ error: error?.message }), { status: error ? 500 : 200 });
+    }
+
+    if (action === 'dismiss_deal_submission') {
+      const { error } = await supabase.from('deal_submissions').update({ status: 'dismissed' }).eq('id', body.submissionId);
       return new Response(JSON.stringify({ error: error?.message }), { status: error ? 500 : 200 });
     }
 
