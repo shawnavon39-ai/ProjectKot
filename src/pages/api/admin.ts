@@ -9,17 +9,19 @@ const ADMIN_USER_IDS = [
   '5b572ba1-910e-429e-818d-f1d6460eb54e',
 ];
 
-function getEnv() {
+function getEnv(locals?: App.Locals) {
+  // Try every known env access pattern for Astro v6 + Cloudflare Pages
+  const cfEnv = (locals as any)?.cfContext?.env ?? {};
   return {
-    supabaseUrl: getSecret('PUBLIC_SUPABASE_URL') ?? import.meta.env.PUBLIC_SUPABASE_URL,
-    serviceRoleKey: getSecret('SUPABASE_SERVICE_ROLE_KEY'),
-    anonKey: getSecret('PUBLIC_SUPABASE_ANON_KEY') ?? import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+    supabaseUrl: getSecret('PUBLIC_SUPABASE_URL') ?? cfEnv.PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL,
+    serviceRoleKey: getSecret('SUPABASE_SERVICE_ROLE_KEY') ?? cfEnv.SUPABASE_SERVICE_ROLE_KEY,
+    anonKey: getSecret('PUBLIC_SUPABASE_ANON_KEY') ?? cfEnv.PUBLIC_SUPABASE_ANON_KEY ?? import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
   };
 }
 
-function getAdminClient() {
-  const { supabaseUrl, serviceRoleKey } = getEnv();
-  if (!serviceRoleKey) throw new Error('SUPABASE_SERVICE_ROLE_KEY not configured');
+function getAdminClient(locals?: App.Locals) {
+  const { supabaseUrl, serviceRoleKey } = getEnv(locals);
+  if (!serviceRoleKey) throw new Error(`SUPABASE_SERVICE_ROLE_KEY not configured. cfContext keys: ${Object.keys((locals as any)?.cfContext ?? {}).join(',')}`);
   return createClient(supabaseUrl, serviceRoleKey);
 }
 
@@ -48,12 +50,12 @@ async function verifyAdmin(request: Request): Promise<{ ok: boolean; reason: str
 const unauthorized = (reason = 'Unauthorized') => new Response(JSON.stringify({ error: 'Unauthorized', reason }), { status: 401 });
 const serverError = (msg: string) => new Response(JSON.stringify({ error: msg }), { status: 500 });
 
-export const GET: APIRoute = async ({ request }) => {
+export const GET: APIRoute = async ({ request, locals }) => {
   try {
     const auth = await verifyAdmin(request);
     if (!auth.ok) return unauthorized(auth.reason);
 
-    const supabase = getAdminClient();
+    const supabase = getAdminClient(locals);
 
     const [
       { data: pendingShops },
@@ -84,12 +86,12 @@ export const GET: APIRoute = async ({ request }) => {
   }
 };
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const auth = await verifyAdmin(request);
     if (!auth.ok) return unauthorized(auth.reason);
 
-    const supabase = getAdminClient();
+    const supabase = getAdminClient(locals);
     const body = await request.json();
     const { action } = body;
 
