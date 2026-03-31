@@ -20,9 +20,18 @@ async function verifyAdmin(request: Request, locals: App.Locals): Promise<boolea
   const token = request.headers.get('Authorization')?.replace('Bearer ', '');
   if (!token) return false;
   try {
-    const supabase = getAdminClient(locals);
-    const { data: { user } } = await supabase.auth.getUser(token);
-    return !!user && ADMIN_USER_IDS.includes(user.id);
+    const runtime = (locals as any).runtime?.env ?? {};
+    const supabaseUrl = runtime.PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = runtime.SUPABASE_SERVICE_ROLE_KEY ?? import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+    const res = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'apikey': serviceRoleKey,
+      },
+    });
+    if (!res.ok) return false;
+    const user = await res.json();
+    return !!user?.id && ADMIN_USER_IDS.includes(user.id);
   } catch {
     return false;
   }
