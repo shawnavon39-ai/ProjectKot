@@ -16,6 +16,7 @@ export default function AdminPanel({ supabaseUrl, supabaseAnonKey }: Props) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [data, setData] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<Tab>('shops');
   const [message, setMessage] = useState('');
@@ -38,6 +39,12 @@ export default function AdminPanel({ supabaseUrl, supabaseAnonKey }: Props) {
     setLoading(true);
     const res = await fetch('/api/admin', { headers: { Authorization: `Bearer ${t}` } });
     if (res.status === 401) { setAuthorized(false); setLoading(false); return; }
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: `Server error (${res.status})` }));
+      setFetchError(err.error ?? `Server error (${res.status})`);
+      setLoading(false);
+      return;
+    }
     const json = await res.json();
     setData(json);
     setAuthorized(true);
@@ -68,6 +75,13 @@ export default function AdminPanel({ supabaseUrl, supabaseAnonKey }: Props) {
     <div className="p-8 text-center">
       <p className="text-slate-600 mb-4">You need to be signed in to access admin.</p>
       <a href="/login" className="px-4 py-2 bg-violet-600 text-white rounded-lg font-medium hover:bg-violet-700 transition">Sign in</a>
+    </div>
+  );
+
+  if (fetchError) return (
+    <div className="p-8 text-center">
+      <p className="text-red-600 font-medium mb-2">Error loading admin data</p>
+      <p className="text-sm text-slate-500">{fetchError}</p>
     </div>
   );
 

@@ -19,9 +19,13 @@ function getAdminClient(locals: App.Locals) {
 async function verifyAdmin(request: Request, locals: App.Locals): Promise<boolean> {
   const token = request.headers.get('Authorization')?.replace('Bearer ', '');
   if (!token) return false;
-  const supabase = getAdminClient(locals);
-  const { data: { user } } = await supabase.auth.getUser(token);
-  return !!user && ADMIN_USER_IDS.includes(user.id);
+  try {
+    const supabase = getAdminClient(locals);
+    const { data: { user } } = await supabase.auth.getUser(token);
+    return !!user && ADMIN_USER_IDS.includes(user.id);
+  } catch {
+    return false;
+  }
 }
 
 const unauthorized = () => new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
