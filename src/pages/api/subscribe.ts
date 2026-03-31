@@ -1,7 +1,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { env } from 'cloudflare:workers';
+import { getSecret } from 'astro:env/server';
 
 export const POST: APIRoute = async ({ request }) => {
   let email: string;
@@ -17,8 +17,7 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({ error: 'Invalid email address' }), { status: 400 });
   }
 
-  const e = env as any;
-  const apiKey = e.BUTTONDOWN_API_KEY ?? import.meta.env.BUTTONDOWN_API_KEY;
+  const apiKey = getSecret('BUTTONDOWN_API_KEY');
 
   if (!apiKey) {
     return new Response(JSON.stringify({ error: 'Service unavailable' }), { status: 503 });

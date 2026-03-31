@@ -2,7 +2,7 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
-import { env } from 'cloudflare:workers';
+import { getSecret } from 'astro:env/server';
 
 const ADMIN_USER_IDS = [
   'd61a80e6-eb10-46d2-b9ff-8da51b93b98a',
@@ -10,11 +10,10 @@ const ADMIN_USER_IDS = [
 ];
 
 function getEnv() {
-  const e = env as any;
   return {
-    supabaseUrl: e.PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL,
-    serviceRoleKey: e.SUPABASE_SERVICE_ROLE_KEY ?? import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
-    anonKey: e.PUBLIC_SUPABASE_ANON_KEY ?? import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+    supabaseUrl: getSecret('PUBLIC_SUPABASE_URL') ?? import.meta.env.PUBLIC_SUPABASE_URL,
+    serviceRoleKey: getSecret('SUPABASE_SERVICE_ROLE_KEY'),
+    anonKey: getSecret('PUBLIC_SUPABASE_ANON_KEY') ?? import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
   };
 }
 
