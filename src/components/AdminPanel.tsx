@@ -28,11 +28,16 @@ export default function AdminPanel({ supabaseUrl, supabaseAnonKey }: Props) {
   });
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) { setLoading(false); return; }
-      setToken(session.access_token);
-      fetchData(session.access_token);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        setToken(session.access_token);
+        fetchData(session.access_token);
+      } else {
+        setToken(null);
+        setLoading(false);
+      }
     });
+    return () => subscription.unsubscribe();
   }, []);
 
   async function fetchData(t: string) {
