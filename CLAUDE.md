@@ -21,6 +21,7 @@ A creator shop discovery platform — users browse, search, and review shops fro
   - `.ts` API routes — plaintext vars: `import { env } from 'cloudflare:workers'`
   - `.ts` API routes — **secrets**: `import { getSecret } from 'astro:env/server'` ← this is the ONLY way secrets work
   - `locals.runtime.env` was removed in Astro v6 — do not use
+  - **Cloudflare secret gotcha:** If a secret isn't being read, delete and re-add it in the Cloudflare dashboard. Cloudflare doesn't always bind secrets to the Worker until they are re-saved after the deployment is live.
 - Blog uses Astro Content Collections (Markdown files in `src/content/blog/`)
 - Affiliate links route through `/go/[slug]` which rewrites URLs with affiliate tags
 
