@@ -1,0 +1,76 @@
+---
+import type { Product } from '../lib/types';
+
+interface Props {
+  product: Product;
+  showShop?: boolean;
+}
+
+const { product, showShop = false } = Astro.props;
+
+const discountPct = product.on_sale && product.original_price && product.price
+  ? Math.round((1 - product.price / product.original_price) * 100)
+  : null;
+---
+
+<a
+  href={product.product_url}
+  target="_blank"
+  rel="noopener noreferrer"
+  class="block bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 overflow-hidden group"
+>
+  {product.image_url ? (
+    <div class="aspect-square bg-slate-100 overflow-hidden">
+      <img
+        src={product.image_url}
+        alt={product.name}
+        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        loading="lazy"
+      />
+    </div>
+  ) : (
+    <div class="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+      <span class="text-slate-400 text-4xl">🛍️</span>
+    </div>
+  )}
+
+  <div class="p-4">
+    {product.on_sale && discountPct && (
+      <span class="inline-block mb-2 text-xs font-semibold px-2 py-0.5 bg-red-100 text-red-700 rounded-full">
+        {discountPct}% off
+      </span>
+    )}
+    {product.on_sale && !discountPct && (
+      <span class="inline-block mb-2 text-xs font-semibold px-2 py-0.5 bg-red-100 text-red-700 rounded-full">
+        On sale
+      </span>
+    )}
+
+    <h3 class="text-sm font-semibold text-slate-900 group-hover:text-violet-600 transition line-clamp-2 mb-2">
+      {product.name}
+    </h3>
+
+    {(product.price || product.original_price) && (
+      <div class="flex items-center gap-2">
+        {product.price && (
+          <span class={`font-bold text-sm ${product.on_sale ? 'text-red-600' : 'text-slate-900'}`}>
+            £{product.price.toFixed(2)}
+          </span>
+        )}
+        {product.on_sale && product.original_price && (
+          <span class="text-xs text-slate-400 line-through">£{product.original_price.toFixed(2)}</span>
+        )}
+      </div>
+    )}
+
+    {showShop && product.shop && (
+      <p class="mt-2 text-xs text-slate-500 truncate">
+        by <span class="text-violet-600">{product.shop.name}</span>
+      </p>
+    )}
+
+    <span class="mt-3 inline-block text-xs text-violet-600 font-medium group-hover:underline">
+      View deal →
+    </span>
+  </div>
+</a>

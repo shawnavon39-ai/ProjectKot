@@ -1,0 +1,103 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { env } from 'cloudflare:workers';
+import { getSupabase } from '../../lib/supabase';
+import type { Product } from '../../lib/types';
+
+const supabase = getSupabase(env);
+
+const url = new URL(Astro.request.url);
+const activeCategory = url.searchParams.get('category');
+
+const categories = [
+  ['fashion', 'Fashion'],
+  ['beauty', 'Beauty'],
+  ['home', 'Home'],
+  ['tech', 'Tech'],
+  ['fitness', 'Fitness'],
+  ['food-drink', 'Food & Drink'],
+  ['other', 'Other'],
+] as const;
+
+let query = supabase
+  .from('products')
+  .select('*, shop:shops(name, slug, platform)')
+  .eq('on_sale', true);
+
+if (activeCategory) {
+  query = query.eq('shops.category', activeCategory);
+}
+
+query = query.order('created_at', { ascending: false });
+
+const { data } = await query;
+const products = (data ?? []) as Product[];
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Creator Shop Deals",
+  "description": "The latest deals and discounts from creator shops across TikTok, Amazon, Etsy and more.",
+  "url": "https://pickyour.shop/deals",
+  "numberOfItems": products.length,
+  "itemListElement": products.slice(0, 10).map((p, i) => ({
+    "@type": "ListItem",
+    "position": i + 1,
+    "name": p.name,
+    "url": p.product_url,
+  })),
+};
+---
+
+<BaseLayout
+  title="Creator Shop Deals"
+  description="The latest deals, discounts and sales from creator shops across TikTok, Amazon, Etsy and more. Updated regularly."
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+  <section class="max-w-7xl mx-auto px-4 py-12">
+    <nav class="text-sm text-slate-500 mb-6">
+      <a href="/" class="hover:text-slate-900 transition">Home</a>
+      <span class="mx-2">›</span>
+      <span class="text-slate-900">Deals</span>
+    </nav>
+
+    <h1 class="text-3xl font-bold text-slate-900 mb-2">Creator Shop Deals</h1>
+    <p class="text-slate-600 mb-8">The latest sales and discounts from creator shops — updated regularly.</p>
+
+    <!-- Category filter -->
+    <div class="flex flex-wrap gap-2 mb-8">
+      <a
+        href="/deals"
+        class={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${!activeCategory ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+      >
+        All deals
+      </a>
+      {categories.map(([slug, name]) => (
+        <a
+          href={`/deals?category=${slug}`}
+          class={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${activeCategory === slug ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+        >
+          {name}
+        </a>
+      ))}
+    </div>
+
+    {products.length > 0 ? (
+      <>
+        <p class="text-sm text-slate-500 mb-6">{products.length} deal{products.length !== 1 ? 's' : ''} available</p>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {products.map(product => <ProductCard product={product} showShop={true} />)}
+        </div>
+      </>
+    ) : (
+      <div class="text-center py-16">
+        <p class="text-slate-500 text-lg mb-2">No deals right now</p>
+        <p class="text-slate-400 text-sm">Check back soon — we add new deals regularly.</p>
+      </div>
+    )}
+  </section>
+</BaseLayout>

@@ -23,6 +23,19 @@ export interface Shop {
   verified: boolean;
 }
 
+export interface Product {
+  id: string;
+  created_at: string;
+  shop_id: string;
+  name: string;
+  price: number | null;
+  original_price: number | null;
+  image_url: string | null;
+  product_url: string;
+  on_sale: boolean;
+  shop?: Shop;
+}
+
 export const platformDisplayNames: Record<Shop['platform'], string> = {
   tiktok: 'TikTok Shop',
   instagram: 'Instagram Shopping',

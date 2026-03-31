@@ -1,0 +1,124 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { env } from 'cloudflare:workers';
+import { getSupabase } from '../../lib/supabase';
+import type { Product } from '../../lib/types';
+
+const { category } = Astro.params;
+
+const categoryMeta: Record<string, { label: string; title: string; description: string }> = {
+  fashion: {
+    label: 'Fashion',
+    title: 'Fashion Deals from Creator Shops',
+    description: 'The best fashion deals and discounts from creator shops on TikTok, Instagram, Depop and more. Updated regularly.',
+  },
+  beauty: {
+    label: 'Beauty',
+    title: 'Beauty Deals & Sales from Creator Shops',
+    description: 'Beauty and skincare deals from your favourite creator shops. Discounts on makeup, skincare, and more.',
+  },
+  home: {
+    label: 'Home',
+    title: 'Home Decor Deals from Creator Shops',
+    description: 'Deals on home décor, interiors, and lifestyle products from creator shops across Amazon, Etsy and more.',
+  },
+  tech: {
+    label: 'Tech',
+    title: 'Tech Deals from Creator Shops',
+    description: 'The latest tech deals and discounts recommended by creators — gadgets, accessories, and more.',
+  },
+  fitness: {
+    label: 'Fitness',
+    title: 'Fitness Deals from Creator Shops',
+    description: 'Deals on gym equipment, activewear, and supplements from fitness creator shops.',
+  },
+  'food-drink': {
+    label: 'Food & Drink',
+    title: 'Food & Drink Deals from Creator Shops',
+    description: 'Deals on cookbooks, kitchen tools, and food products from creator shops.',
+  },
+  other: {
+    label: 'Other',
+    title: 'Creator Shop Deals',
+    description: 'Deals and discounts from creator shops across all categories.',
+  },
+};
+
+const meta = categoryMeta[category ?? ''];
+if (!meta) return Astro.redirect('/deals', 307);
+
+const supabase = getSupabase(env);
+
+const { data } = await supabase
+  .from('products')
+  .select('*, shop:shops!inner(name, slug, platform, category)')
+  .eq('on_sale', true)
+  .eq('shop.category', category)
+  .order('created_at', { ascending: false });
+
+const products = (data ?? []) as Product[];
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": meta.title,
+  "description": meta.description,
+  "url": `https://pickyour.shop/deals/${category}`,
+  "numberOfItems": products.length,
+  "itemListElement": products.slice(0, 10).map((p, i) => ({
+    "@type": "ListItem",
+    "position": i + 1,
+    "name": p.name,
+    "url": p.product_url,
+  })),
+};
+---
+
+<BaseLayout title={meta.title} description={meta.description}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+  <section class="max-w-7xl mx-auto px-4 py-12">
+    <nav class="text-sm text-slate-500 mb-6">
+      <a href="/" class="hover:text-slate-900 transition">Home</a>
+      <span class="mx-2">›</span>
+      <a href="/deals" class="hover:text-slate-900 transition">Deals</a>
+      <span class="mx-2">›</span>
+      <span class="text-slate-900">{meta.label}</span>
+    </nav>
+
+    <h1 class="text-3xl font-bold text-slate-900 mb-2">{meta.title}</h1>
+    <p class="text-slate-600 mb-8">{meta.description}</p>
+
+    <!-- Other categories -->
+    <div class="flex flex-wrap gap-2 mb-8">
+      <a href="/deals" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+        All deals
+      </a>
+      {Object.entries(categoryMeta).filter(([slug]) => slug !== category).map(([slug, m]) => (
+        <a
+          href={`/deals/${slug}`}
+          class="px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition"
+        >
+          {m.label}
+        </a>
+      ))}
+    </div>
+
+    {products.length > 0 ? (
+      <>
+        <p class="text-sm text-slate-500 mb-6">{products.length} deal{products.length !== 1 ? 's' : ''} available</p>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {products.map(product => <ProductCard product={product} showShop={true} />)}
+        </div>
+      </>
+    ) : (
+      <div class="text-center py-16">
+        <p class="text-slate-500 text-lg mb-2">No {meta.label.toLowerCase()} deals right now</p>
+        <p class="text-slate-400 text-sm">Check back soon — we add new deals regularly.</p>
+      </div>
+    )}
+  </section>
+</BaseLayout>
