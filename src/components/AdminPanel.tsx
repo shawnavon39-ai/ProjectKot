@@ -6,7 +6,7 @@ interface Props {
   supabaseAnonKey: string;
 }
 
-type Tab = 'shops' | 'reviews' | 'verified' | 'products' | 'deals';
+type Tab = 'shops' | 'reviews' | 'verified' | 'products' | 'deals' | 'enrich';
 
 export default function AdminPanel({ supabaseUrl, supabaseAnonKey }: Props) {
   const supabaseRef = useRef<SupabaseClient | null>(null);
@@ -25,6 +25,11 @@ export default function AdminPanel({ supabaseUrl, supabaseAnonKey }: Props) {
   // New product form state
   const [productForm, setProductForm] = useState({
     shopId: '', name: '', price: '', originalPrice: '', imageUrl: '', productUrl: '', onSale: false,
+  });
+
+  // Enrich form state
+  const [enrichForm, setEnrichForm] = useState({
+    shopId: '', instagramUrl: '', tiktokUrl: '', youtubeUrl: '', longDescription: '',
   });
 
   useEffect(() => {
@@ -100,6 +105,7 @@ export default function AdminPanel({ supabaseUrl, supabaseAnonKey }: Props) {
     { id: 'shops', label: 'Pending Shops', count: data.pendingCount },
     { id: 'reviews', label: 'Pending Reviews', count: data.pendingReviews.length },
     { id: 'deals', label: 'Deal Submissions', count: data.dealSubmissions?.length ?? 0 },
+    { id: 'enrich', label: 'Enrich' },
     { id: 'verified', label: 'Verified', count: data.approvedCount },
     { id: 'products', label: 'Products', count: data.products.length },
   ];
@@ -264,6 +270,90 @@ export default function AdminPanel({ supabaseUrl, supabaseAnonKey }: Props) {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Enrich */}
+      {activeTab === 'enrich' && (
+        <div className="bg-slate-50 rounded-xl border border-slate-200 p-5">
+          <h3 className="font-semibold text-slate-900 mb-4 text-sm">Enrich Shop Page</h3>
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs text-slate-500 block mb-1">Shop</label>
+              <select
+                value={enrichForm.shopId}
+                onChange={e => {
+                  const shop = data.approvedShops.find((s: any) => s.id === e.target.value);
+                  setEnrichForm({
+                    shopId: e.target.value,
+                    instagramUrl: shop?.instagram_url ?? '',
+                    tiktokUrl: shop?.tiktok_url ?? '',
+                    youtubeUrl: shop?.youtube_url ?? '',
+                    longDescription: shop?.long_description ?? '',
+                  });
+                }}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
+              >
+                <option value="">Select shop...</option>
+                {data.approvedShops.map((shop: any) => (
+                  <option key={shop.id} value={shop.id}>{shop.name} ({shop.platform})</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 block mb-1">Instagram URL</label>
+              <input
+                type="url"
+                value={enrichForm.instagramUrl}
+                onChange={e => setEnrichForm(f => ({ ...f, instagramUrl: e.target.value }))}
+                placeholder="https://instagram.com/..."
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 block mb-1">TikTok URL</label>
+              <input
+                type="url"
+                value={enrichForm.tiktokUrl}
+                onChange={e => setEnrichForm(f => ({ ...f, tiktokUrl: e.target.value }))}
+                placeholder="https://tiktok.com/@..."
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 block mb-1">YouTube URL</label>
+              <input
+                type="url"
+                value={enrichForm.youtubeUrl}
+                onChange={e => setEnrichForm(f => ({ ...f, youtubeUrl: e.target.value }))}
+                placeholder="https://youtube.com/@..."
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 block mb-1">Long description</label>
+              <textarea
+                value={enrichForm.longDescription}
+                onChange={e => setEnrichForm(f => ({ ...f, longDescription: e.target.value }))}
+                rows={5}
+                placeholder="A longer, SEO-friendly description of this creator and their shop..."
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 resize-y"
+              />
+            </div>
+            <button
+              onClick={async () => {
+                if (!enrichForm.shopId) {
+                  setMessage('Select a shop first.');
+                  setMessageType('error');
+                  return;
+                }
+                await action({ action: 'update_shop_socials', ...enrichForm });
+              }}
+              className="px-4 py-2 bg-violet-600 text-white text-sm rounded-lg font-medium hover:bg-violet-700 transition"
+            >
+              Save
+            </button>
+          </div>
         </div>
       )}
 

@@ -68,7 +68,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
     ] = await Promise.all([
       supabase.from('shops').select('*').eq('status', 'pending').order('created_at', { ascending: true }),
       supabase.from('reviews').select('*, shops(name)').eq('status', 'pending').order('created_at', { ascending: true }),
-      supabase.from('shops').select('id, name, slug, platform, verified, followers').eq('status', 'approved').order('name'),
+      supabase.from('shops').select('id, name, slug, platform, verified, followers, instagram_url, tiktok_url, youtube_url, long_description').eq('status', 'approved').order('name'),
       supabase.from('shops').select('*', { count: 'exact', head: true }).eq('status', 'approved'),
       supabase.from('shops').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('products').select('*, shop:shops(name)').order('created_at', { ascending: false }),
@@ -140,6 +140,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     if (action === 'dismiss_deal_submission') {
       const { error } = await supabase.from('deal_submissions').update({ status: 'dismissed' }).eq('id', body.submissionId);
+      return new Response(JSON.stringify({ error: error?.message }), { status: error ? 500 : 200 });
+    }
+
+    if (action === 'update_shop_socials') {
+      const { error } = await supabase.from('shops').update({
+        instagram_url: body.instagramUrl || null,
+        tiktok_url: body.tiktokUrl || null,
+        youtube_url: body.youtubeUrl || null,
+        long_description: body.longDescription || null,
+      }).eq('id', body.shopId);
       return new Response(JSON.stringify({ error: error?.message }), { status: error ? 500 : 200 });
     }
 

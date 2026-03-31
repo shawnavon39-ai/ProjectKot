@@ -21,6 +21,10 @@ export interface Shop {
   avg_rating: number;
   review_count: number;
   verified: boolean;
+  long_description: string | null;
+  instagram_url: string | null;
+  tiktok_url: string | null;
+  youtube_url: string | null;
 }
 
 export interface Product {
