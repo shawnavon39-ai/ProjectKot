@@ -1,9 +1,8 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { env } from 'cloudflare:workers';
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   let email: string;
 
   try {
@@ -17,7 +16,9 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({ error: 'Invalid email address' }), { status: 400 });
   }
 
-  const apiKey = (env as any).BUTTONDOWN_API_KEY;
+  const runtime = (locals as any).runtime?.env ?? {};
+  const apiKey = runtime.BUTTONDOWN_API_KEY ?? import.meta.env.BUTTONDOWN_API_KEY;
+
   if (!apiKey) {
     return new Response(JSON.stringify({ error: 'Service unavailable' }), { status: 503 });
   }
@@ -31,12 +32,10 @@ export const POST: APIRoute = async ({ request }) => {
     body: JSON.stringify({ email }),
   });
 
-  // 201 = subscribed, 200 = already subscribed — both are fine
   if (res.status === 201 || res.status === 200) {
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   }
 
-  // 409 = already a subscriber
   if (res.status === 409) {
     return new Response(JSON.stringify({ error: 'already_subscribed' }), { status: 409 });
   }
