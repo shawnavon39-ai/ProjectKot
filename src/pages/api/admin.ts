@@ -21,7 +21,7 @@ function getEnv(locals?: App.Locals) {
 
 function getAdminClient(locals?: App.Locals) {
   const { supabaseUrl, serviceRoleKey } = getEnv(locals);
-  if (!serviceRoleKey) throw new Error(`SUPABASE_SERVICE_ROLE_KEY not configured. cfContext keys: ${Object.keys((locals as any)?.cfContext ?? {}).join(',')}`);
+  if (!serviceRoleKey) throw new Error('SUPABASE_SERVICE_ROLE_KEY not configured');
   return createClient(supabaseUrl, serviceRoleKey);
 }
 
