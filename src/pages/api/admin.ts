@@ -16,33 +16,37 @@ function getAdminClient(locals: App.Locals) {
   return createClient(supabaseUrl, serviceRoleKey);
 }
 
-async function verifyAdmin(request: Request, locals: App.Locals): Promise<boolean> {
+async function verifyAdmin(request: Request, locals: App.Locals): Promise<{ ok: boolean; reason: string }> {
   const token = request.headers.get('Authorization')?.replace('Bearer ', '');
-  if (!token) return false;
+  if (!token) return { ok: false, reason: 'no_token' };
   try {
     const runtime = (locals as any).runtime?.env ?? {};
     const supabaseUrl = runtime.PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL;
-    const serviceRoleKey = runtime.SUPABASE_SERVICE_ROLE_KEY ?? import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+    const anonKey = runtime.PUBLIC_SUPABASE_ANON_KEY ?? import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+    if (!supabaseUrl) return { ok: false, reason: 'no_supabase_url' };
     const res = await fetch(`${supabaseUrl}/auth/v1/user`, {
       headers: {
         'Authorization': `Bearer ${token}`,
-        'apikey': serviceRoleKey,
+        'apikey': anonKey,
       },
     });
-    if (!res.ok) return false;
+    if (!res.ok) return { ok: false, reason: `supabase_${res.status}` };
     const user = await res.json();
-    return !!user?.id && ADMIN_USER_IDS.includes(user.id);
-  } catch {
-    return false;
+    if (!user?.id) return { ok: false, reason: 'no_user_id' };
+    if (!ADMIN_USER_IDS.includes(user.id)) return { ok: false, reason: `not_admin:${user.id}` };
+    return { ok: true, reason: 'ok' };
+  } catch (e: any) {
+    return { ok: false, reason: `exception:${e?.message}` };
   }
 }
 
-const unauthorized = () => new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+const unauthorized = (reason = 'Unauthorized') => new Response(JSON.stringify({ error: 'Unauthorized', reason }), { status: 401 });
 const serverError = (msg: string) => new Response(JSON.stringify({ error: msg }), { status: 500 });
 
 export const GET: APIRoute = async ({ request, locals }) => {
   try {
-    if (!await verifyAdmin(request, locals)) return unauthorized();
+    const auth = await verifyAdmin(request, locals);
+    if (!auth.ok) return unauthorized(auth.reason);
 
     const supabase = getAdminClient(locals);
 
@@ -77,7 +81,8 @@ export const GET: APIRoute = async ({ request, locals }) => {
 
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
-    if (!await verifyAdmin(request, locals)) return unauthorized();
+    const auth = await verifyAdmin(request, locals);
+    if (!auth.ok) return unauthorized(auth.reason);
 
     const supabase = getAdminClient(locals);
     const body = await request.json();
