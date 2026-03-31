@@ -71,6 +71,46 @@ export const curatedLists: CuratedList[] = [
     sort: 'popular',
     limit: 20,
   },
+  {
+    slug: 'gift-ideas-for-her',
+    title: 'Gift Ideas for Her — Creator Picks',
+    description: 'Fashion, beauty, and lifestyle creator shops perfect for gifting. Curated picks from the UK\'s top creators.',
+    category: 'fashion',
+    sort: 'rating',
+    limit: 20,
+  },
+  {
+    slug: 'gift-ideas-for-him',
+    title: 'Gift Ideas for Him — Creator Picks',
+    description: 'Tech, fitness, and lifestyle creator shops with great gifting options for men.',
+    category: 'tech',
+    sort: 'rating',
+    limit: 20,
+  },
+  {
+    slug: 'home-gifts-from-creators',
+    title: 'Home Gifts from Creators',
+    description: 'Creator-curated home décor and lifestyle shops — great for housewarming gifts or treating yourself.',
+    category: 'home',
+    sort: 'rating',
+    limit: 20,
+  },
+  {
+    slug: 'fitness-gifts-from-creators',
+    title: 'Fitness Gifts from Creators',
+    description: 'Gym gear, nutrition, and wellness picks from the UK\'s top fitness creators.',
+    category: 'fitness',
+    sort: 'rating',
+    limit: 20,
+  },
+  {
+    slug: 'beauty-gifts-from-creators',
+    title: 'Beauty Gifts from Creators',
+    description: 'Skincare, makeup, and wellness creator shops — community-rated and perfect for gifting.',
+    category: 'beauty',
+    sort: 'rating',
+    limit: 20,
+  },
 ];
 
 export function getListBySlug(slug: string): CuratedList | undefined {

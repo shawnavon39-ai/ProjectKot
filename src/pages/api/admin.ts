@@ -47,13 +47,13 @@ async function verifyAdmin(request: Request): Promise<{ ok: boolean; reason: str
   }
 }
 
-const unauthorized = (reason = 'Unauthorized') => new Response(JSON.stringify({ error: 'Unauthorized', reason }), { status: 401 });
+const unauthorized = () => new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
 const serverError = (msg: string) => new Response(JSON.stringify({ error: msg }), { status: 500 });
 
 export const GET: APIRoute = async ({ request, locals }) => {
   try {
     const auth = await verifyAdmin(request);
-    if (!auth.ok) return unauthorized(auth.reason);
+    if (!auth.ok) return unauthorized();
 
     const supabase = getAdminClient(locals);
 
@@ -89,7 +89,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const auth = await verifyAdmin(request);
-    if (!auth.ok) return unauthorized(auth.reason);
+    if (!auth.ok) return unauthorized();
 
     const supabase = getAdminClient(locals);
     const body = await request.json();

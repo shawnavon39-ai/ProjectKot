@@ -16,7 +16,6 @@ export default function AdminPanel({ supabaseUrl, supabaseAnonKey }: Props) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
-  const [authReason, setAuthReason] = useState('');
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [data, setData] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<Tab>('shops');
@@ -44,11 +43,7 @@ export default function AdminPanel({ supabaseUrl, supabaseAnonKey }: Props) {
   async function fetchData(t: string) {
     setLoading(true);
     const res = await fetch('/api/admin', { headers: { Authorization: `Bearer ${t}` } });
-    if (res.status === 401) {
-      const j = await res.json().catch(() => ({}));
-      setAuthReason(j.reason ?? 'unknown');
-      setAuthorized(false); setLoading(false); return;
-    }
+    if (res.status === 401) { setAuthorized(false); setLoading(false); return; }
     if (!res.ok) {
       const err = await res.json().catch(() => ({ error: `Server error (${res.status})` }));
       setFetchError(err.error ?? `Server error (${res.status})`);
@@ -98,7 +93,6 @@ export default function AdminPanel({ supabaseUrl, supabaseAnonKey }: Props) {
   if (!authorized) return (
     <div className="p-8 text-center">
       <p className="text-red-600 font-medium">Not authorised.</p>
-      {authReason && <p className="text-xs text-slate-400 mt-1">{authReason}</p>}
     </div>
   );
 
