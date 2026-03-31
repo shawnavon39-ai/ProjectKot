@@ -16,7 +16,11 @@ A creator shop discovery platform — users browse, search, and review shops fro
 - Pages with `export const prerender = false` run as Cloudflare Workers at the edge (SSR)
 - Pages without that export are statically pre-rendered at build time
 - Supabase client uses `cloudflare:workers` env binding at runtime, `import.meta.env` at build time
-- **Astro v6:** ALL files (`.astro` AND `.ts` API routes) must use `import { env } from 'cloudflare:workers'` — `locals.runtime.env` was removed in v6
+- **Astro v6 env access rules:**
+  - `.astro` files: `import { env } from 'cloudflare:workers'` for plaintext vars
+  - `.ts` API routes — plaintext vars: `import { env } from 'cloudflare:workers'`
+  - `.ts` API routes — **secrets**: `import { getSecret } from 'astro:env/server'` ← this is the ONLY way secrets work
+  - `locals.runtime.env` was removed in Astro v6 — do not use
 - Blog uses Astro Content Collections (Markdown files in `src/content/blog/`)
 - Affiliate links route through `/go/[slug]` which rewrites URLs with affiliate tags
 
