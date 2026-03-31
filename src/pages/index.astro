@@ -18,31 +18,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import ShopCard from '../components/ShopCard.astro';
 import AdUnit from '../components/AdUnit.astro';
 import EmailSignup from '../components/EmailSignup';
-import SearchBar from '../components/SearchBar';
 import { env } from 'cloudflare:workers';
 import { getSupabase } from '../lib/supabase';
 import { platformDisplayNames, platformColours } from '../lib/types';
 import type { Shop } from '../lib/types';
 
 const supabase = getSupabase(env);
-
-// Stats for social proof bar
-const { count: totalShops } = await supabase
-  .from('shops')
-  .select('*', { count: 'exact', head: true })
-  .eq('status', 'approved');
-
-const { count: totalReviews } = await supabase
-  .from('reviews')
-  .select('*', { count: 'exact', head: true })
-  .eq('status', 'approved');
-
-const { data: platformData } = await supabase
-  .from('shops')
-  .select('platform')
-  .eq('status', 'approved');
-
-const totalPlatforms = new Set((platformData ?? []).map((s: any) => s.platform)).size;
 
 const { data: featuredShops } = await supabase
   .from('shops')
@@ -136,10 +117,6 @@ const platforms = Object.entries(platformDisplayNames).map(([key, name]) => ({
       Creator shops from TikTok, Amazon, Instagram and more — curated, rated, and easy to browse.
     </p>
 
-    <div class="mt-6 max-w-xl mx-auto">
-      <SearchBar supabaseUrl={env.PUBLIC_SUPABASE_URL} supabaseAnonKey={env.PUBLIC_SUPABASE_ANON_KEY} client:only="react" />
-    </div>
-
     <!-- Platform pills -->
     <div class="mt-6 flex flex-wrap gap-2 justify-center">
       {platforms.map(p => (
@@ -162,23 +139,37 @@ const platforms = Object.entries(platformDisplayNames).map(([key, name]) => ({
     </div>
   </section>
 
-  <!-- Stats bar -->
-  <section class="max-w-7xl mx-auto px-4 pb-10">
-    <div class="flex flex-wrap justify-center gap-8 sm:gap-16 py-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
-      <a href="/shops" class="text-center group">
-        <p class="text-3xl font-extrabold text-slate-900 group-hover:text-violet-600 transition">{(totalShops ?? 0).toLocaleString()}</p>
-        <p class="text-sm text-slate-500 mt-0.5 group-hover:text-violet-500 transition">Creator shops</p>
-      </a>
-      <a href="/shops" class="text-center group">
-        <p class="text-3xl font-extrabold text-slate-900 group-hover:text-violet-600 transition">{totalPlatforms}</p>
-        <p class="text-sm text-slate-500 mt-0.5 group-hover:text-violet-500 transition">Platforms</p>
-      </a>
-      <a href="/shops?sort=rating" class="text-center group">
-        <p class="text-3xl font-extrabold text-slate-900 group-hover:text-violet-600 transition">{(totalReviews ?? 0).toLocaleString()}</p>
-        <p class="text-sm text-slate-500 mt-0.5 group-hover:text-violet-500 transition">Reviews</p>
-      </a>
-    </div>
-  </section>
+  <!-- Current Deals -->
+  {deals.length > 0 && (
+    <section class="max-w-7xl mx-auto px-4 pb-10">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-slate-900">
+          🔥 <span class="text-red-500">Current Deals</span>
+        </h2>
+        <a href="/deals" class="text-sm text-violet-600 hover:text-violet-700 font-medium transition">View all deals →</a>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {deals.map((product: any) => (
+          <a
+            href={product.product_url}
+            target="_blank"
+            rel="noopener noreferrer sponsored"
+            class="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md hover:-translate-y-0.5 transition group"
+          >
+            <div class="mb-2">
+              <span class="text-xs font-semibold px-2 py-0.5 bg-red-100 text-red-700 rounded-full">SALE</span>
+            </div>
+            <p class="text-sm font-semibold text-slate-900 group-hover:text-violet-600 transition line-clamp-2 mb-2">{product.name}</p>
+            <p class="text-xs text-slate-400 mb-2">via {product.shop?.name}</p>
+            <div class="flex items-baseline gap-2">
+              {product.price && <span class="text-base font-bold text-slate-900">£{Number(product.price).toFixed(2)}</span>}
+              {product.original_price && <span class="text-xs text-slate-400 line-through">£{Number(product.original_price).toFixed(2)}</span>}
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
 
   <!-- Shop of the Day -->
   {shopOfTheDay && (
@@ -233,38 +224,6 @@ const platforms = Object.entries(platformDisplayNames).map(([key, name]) => ({
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {trendingShops.map(shop => (
           <ShopCard shop={shop} />
-        ))}
-      </div>
-    </section>
-  )}
-
-  <!-- Current Deals -->
-  {deals.length > 0 && (
-    <section class="max-w-7xl mx-auto px-4 pb-16">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-2xl font-bold text-slate-900">
-          🔥 <span class="text-red-500">Current Deals</span>
-        </h2>
-        <a href="/deals" class="text-sm text-violet-600 hover:text-violet-700 font-medium transition">View all deals →</a>
-      </div>
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {deals.map((product: any) => (
-          <a
-            href={product.product_url}
-            target="_blank"
-            rel="noopener noreferrer sponsored"
-            class="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md hover:-translate-y-0.5 transition group"
-          >
-            <div class="mb-2">
-              <span class="text-xs font-semibold px-2 py-0.5 bg-red-100 text-red-700 rounded-full">SALE</span>
-            </div>
-            <p class="text-sm font-semibold text-slate-900 group-hover:text-violet-600 transition line-clamp-2 mb-2">{product.name}</p>
-            <p class="text-xs text-slate-400 mb-2">via {product.shop?.name}</p>
-            <div class="flex items-baseline gap-2">
-              {product.price && <span class="text-base font-bold text-slate-900">£{Number(product.price).toFixed(2)}</span>}
-              {product.original_price && <span class="text-xs text-slate-400 line-through">£{Number(product.original_price).toFixed(2)}</span>}
-            </div>
-          </a>
         ))}
       </div>
     </section>

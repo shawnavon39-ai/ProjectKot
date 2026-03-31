@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { User } from '@supabase/supabase-js';
 
@@ -36,12 +36,37 @@ export default function NavBar({ supabaseUrl, supabaseAnonKey }: Props) {
 
   const displayName = user?.user_metadata?.display_name;
 
+  function handleSearch(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const q = (e.currentTarget.elements.namedItem('q') as HTMLInputElement).value.trim();
+    if (q) window.location.href = `/shops?q=${encodeURIComponent(q)}`;
+  }
+
   return (
-    <nav className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-      <a href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight text-slate-900">
+    <nav className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
+      <a href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight text-slate-900 flex-shrink-0">
         <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-violet-600 text-white text-sm font-bold">P</span>
-        <span>Pick Your Shop</span>
+        <span className="hidden sm:inline">Pick Your Shop</span>
       </a>
+
+      {/* Search bar */}
+      <form onSubmit={handleSearch} className="flex-1 max-w-xs hidden sm:flex">
+        <div className="relative w-full">
+          <input
+            name="q"
+            type="search"
+            placeholder="Search shops..."
+            className="w-full pl-3 pr-8 py-1.5 text-sm rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition"
+          />
+          <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-violet-600 transition">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
+        </div>
+      </form>
+
+      <div className="flex-1 sm:hidden" />
 
       {/* Mobile menu button */}
       <button
@@ -98,6 +123,21 @@ export default function NavBar({ supabaseUrl, supabaseAnonKey }: Props) {
       {menuOpen && (
         <div className="absolute top-full left-0 right-0 bg-white border-b border-slate-200 shadow-lg sm:hidden z-50">
           <div className="flex flex-col px-4 py-3 gap-3">
+            <form onSubmit={handleSearch}>
+              <div className="relative">
+                <input
+                  name="q"
+                  type="search"
+                  placeholder="Search shops..."
+                  className="w-full pl-3 pr-8 py-2 text-sm rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                />
+                <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
+              </div>
+            </form>
             <a href="/shops" className="text-sm text-slate-700 font-medium py-1">Browse</a>
             <a href="/deals" className="text-sm text-slate-700 font-medium py-1">Deals</a>
             <a href="/lists" className="text-sm text-slate-700 font-medium py-1">Lists</a>
