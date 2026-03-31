@@ -4,7 +4,10 @@ import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 import { createClient } from '@supabase/supabase-js';
 
-const ADMIN_USER_ID = 'd61a80e6-eb10-46d2-b9ff-8da51b93b98a';
+const ADMIN_USER_IDS = [
+  'd61a80e6-eb10-46d2-b9ff-8da51b93b98a',
+  '5b572ba1-910e-429e-818d-f1d6460eb54e',
+];
 
 function getAdminClient() {
   const supabaseUrl = (env as any).PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL;
@@ -17,7 +20,7 @@ async function verifyAdmin(request: Request): Promise<boolean> {
   if (!token) return false;
   const supabase = getAdminClient();
   const { data: { user } } = await supabase.auth.getUser(token);
-  return user?.id === ADMIN_USER_ID;
+  return !!user && ADMIN_USER_IDS.includes(user.id);
 }
 
 const unauthorized = () => new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
